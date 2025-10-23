@@ -32,7 +32,7 @@ export default function EnergyConsumptionPanel() {
 
       <div className="p-6">
         {/* Current Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
             <div className="flex items-center justify-between">
               <div>
@@ -76,7 +76,7 @@ export default function EnergyConsumptionPanel() {
 
         {/* Tabs for different views */}
         <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="daily">Diario</TabsTrigger>
             <TabsTrigger value="weekly">Semanal</TabsTrigger>
             <TabsTrigger value="monthly">Mensual</TabsTrigger>
@@ -89,7 +89,7 @@ export default function EnergyConsumptionPanel() {
                 <Badge variant="outline">Últimas 24h</Badge>
               </div>
               {/* Simulated bar chart */}
-              <div className="h-64 flex items-end justify-between gap-2">
+              <div className="h-48 sm:h-64 flex items-end justify-between gap-1 sm:gap-2">
                 {[45, 38, 52, 48, 65, 72, 68, 55, 62, 58, 70, 75, 82, 78, 85, 80, 72, 68, 75, 70, 65, 58, 52, 48].map(
                   (value, index) => (
                     <div key={index} className="flex-1 flex flex-col items-center gap-1">
@@ -112,7 +112,7 @@ export default function EnergyConsumptionPanel() {
                 <span className="text-muted-foreground">Consumo por día</span>
                 <Badge variant="outline">Esta semana</Badge>
               </div>
-              <div className="h-64 flex items-end justify-between gap-4">
+              <div className="h-48 sm:h-64 flex items-end justify-between gap-2 sm:gap-4">
                 {[
                   { day: "Lun", value: 85 },
                   { day: "Mar", value: 78 },
@@ -141,7 +141,7 @@ export default function EnergyConsumptionPanel() {
                 <span className="text-muted-foreground">Comparativa mensual</span>
                 <Badge variant="outline">Últimos 6 meses</Badge>
               </div>
-              <div className="h-64 flex items-end justify-between gap-4">
+              <div className="h-48 sm:h-64 flex items-end justify-between gap-2 sm:gap-4">
                 {[
                   { month: "Jul", value: 72 },
                   { month: "Ago", value: 85 },

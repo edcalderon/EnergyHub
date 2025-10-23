@@ -1,4 +1,4 @@
-import { Zap, Menu, Bell, User, Settings, Search } from "lucide-react";
+import { Zap, Menu, User, Settings, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import NotificationDropdown from "@/components/ui/notification-dropdown";
 
 export default function DashboardHeader() {
   return (
@@ -57,12 +58,7 @@ export default function DashboardHeader() {
           </div>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-              4
-            </Badge>
-          </Button>
+          <NotificationDropdown />
 
           {/* Settings */}
           <Button variant="ghost" size="icon">
@@ -77,8 +73,7 @@ export default function DashboardHeader() {
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">Mi Empresa S.L.</p>
-                  <p className="text-xs text-muted-foreground">Plan Premium</p>
+                  <p className="text-sm font-medium">Mi Empresa S.A.S</p>
                 </div>
               </Button>
             </DropdownMenuTrigger>

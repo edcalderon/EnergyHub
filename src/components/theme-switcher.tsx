@@ -9,10 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Laptop, Moon, Sun } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
-const ThemeSwitcher = () => {
+interface ThemeSwitcherProps {
+  open?: boolean;
+}
+
+const ThemeSwitcher = ({ open = false }: ThemeSwitcherProps) => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -25,34 +30,39 @@ const ThemeSwitcher = () => {
     return null;
   }
 
-  const ICON_SIZE = 16;
+  const ICON_SIZE = 18; // Larger icons for collapsed state
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size={"sm"}>
-          {theme === "light" ? (
-            <Sun
-              key="light"
-              size={ICON_SIZE}
-              className={"text-muted-foreground"}
-            />
-          ) : theme === "dark" ? (
-            <Moon
-              key="dark"
-              size={ICON_SIZE}
-              className={"text-muted-foreground"}
-            />
-          ) : (
-            <Laptop
-              key="system"
-              size={ICON_SIZE}
-              className={"text-muted-foreground"}
-            />
-          )}
+        <Button variant="ghost" size="icon" className={cn("relative hover:bg-accent", open ? "h-9 w-auto px-2" : "h-10 w-10")}>
+          <div className="flex items-center gap-2">
+            {theme === "light" ? (
+              <Sun
+                key="light"
+                size={ICON_SIZE}
+                className={"text-muted-foreground"}
+              />
+            ) : theme === "dark" ? (
+              <Moon
+                key="dark"
+                size={ICON_SIZE}
+                className={"text-muted-foreground"}
+              />
+            ) : (
+              <Laptop
+                key="system"
+                size={ICON_SIZE}
+                className={"text-muted-foreground"}
+              />
+            )}
+            {open && (
+              <span className="text-foreground text-sm">Tema</span>
+            )}
+          </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-content" align="start">
+      <DropdownMenuContent className="w-content" align="center" side="bottom" sideOffset={12}>
         <DropdownMenuRadioGroup
           value={theme}
           onValueChange={(e) => setTheme(e)}

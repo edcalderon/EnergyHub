@@ -1,6 +1,5 @@
 "use client";
 
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import PowerOutageMap from "@/components/dashboard/PowerOutageMap";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,7 @@ import { ArrowLeft } from "lucide-react";
 export default function MapaCortesPage() {
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full">
         <div className="mb-6">
           <Link href="/">
             <Button variant="ghost" size="sm" className="mb-4">

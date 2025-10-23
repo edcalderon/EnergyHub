@@ -1,7 +1,5 @@
 "use client";
 
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import NotificationCenter from "@/components/dashboard/NotificationCenter";
 import EnergyConsumptionPanel from "@/components/dashboard/EnergyConsumptionPanel";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -10,10 +8,8 @@ import { Leaf, DollarSign, MapPin, ArrowRight } from "lucide-react";
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background w-full">
+      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
         {/* Hero Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -25,18 +21,13 @@ export default function Page() {
         </div>
 
         {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Notifications */}
-          <div className="lg:col-span-1">
-            <NotificationCenter />
-          </div>
-
-          {/* Right Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 gap-6">
+          {/* Main Content */}
+          <div className="space-y-6">
             <EnergyConsumptionPanel />
-            
+
             {/* Quick Access Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link href="/tarifas">
                 <Card className="p-6 hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary">
                   <div className="flex items-center gap-3 mb-3">
