@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react"; 
 import Globe from "@/components/ui/globe";
 import { cn } from "@/lib/utils";
+import { getCelsiaLogoUrl, getInternalUrl, createImageWithFallback, debugUrls } from "@/lib/url-utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
@@ -475,6 +476,11 @@ function SimpleThemeToggle() {
 
 // EnergyHub specific ScrollGlobe component
 export default function EnergyHubLanding() {
+  // Debug URLs in development
+  useEffect(() => {
+    debugUrls('EnergyHub Landing');
+  }, []);
+
   const energySections = [
     {
       id: "hero",
@@ -600,7 +606,7 @@ export default function EnergyHubLanding() {
       description: "En este momento de transformación energética global, vemos no solo una región piloto, sino un lienzo de potencial sostenible infinito. Desde el Valle del Cauca hacia el mundo, cada optimización representa progreso, cada innovación construye puentes hacia nuestro futuro energético global colectivo.",
       align: "center" as const,
       actions: [
-        { label: "Iniciar tu Viaje", variant: "primary" as const, href: "/dashboard" }
+        { label: "Iniciar tu Viaje", variant: "primary" as const, href: getInternalUrl("/dashboard") }
       ]
     }
   ];
@@ -627,17 +633,23 @@ export default function EnergyHubLanding() {
             className="hover:opacity-80 transition-opacity"
           >
             <img 
-              src="/celsia-logo.png" 
+              {...createImageWithFallback(getCelsiaLogoUrl(), 'Celsia')}
               alt="Celsia" 
               className="h-6 w-6 object-contain"
+              onLoad={() => console.log('Landing Page - Celsia logo loaded successfully')}
               onError={(e) => {
+                console.error('Landing Page - Celsia logo failed to load:', e);
+                console.log('Landing Page - Using text fallback');
                 // Fallback to text if image fails to load
                 e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                const fallbackElement = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallbackElement) {
+                  fallbackElement.classList.remove('hidden');
+                }
               }}
             />
+            <span className="text-xs font-semibold text-foreground hidden">Celsia</span>
           </a>
-          <span className="text-xs font-semibold text-foreground hidden">Celsia</span>
           <span className="text-xs font-semibold text-foreground">By Celsia</span>
         </div>
       </div>

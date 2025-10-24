@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { getCelsiaLogoUrlForPDF, debugUrls } from './url-utils';
 
 export interface EcoFeedbackData {
   co2Emitted: number;
@@ -22,16 +23,21 @@ export interface EcoFeedbackData {
 export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   const doc = new jsPDF();
   
+  // Debug URLs in development
+  debugUrls('PDF Generator');
+  
   // Add Celsia logo
   try {
-    // Load the Celsia logo from public folder
-    const logoUrl = '/celsia.png';
+    // Load the Celsia logo using the URL utility
+    const logoUrl = getCelsiaLogoUrlForPDF();
+    console.log('PDF Generator - Loading logo from:', logoUrl);
     
     // Create an image element to load the logo
     const img = new Image();
     img.crossOrigin = 'anonymous';
     
     img.onload = function() {
+      console.log('PDF Generator - Logo loaded successfully');
       // Add smaller logo to PDF (1:1 ratio - smaller size)
       doc.addImage(img, 'PNG', 20, 5, 30, 30);
       
@@ -39,8 +45,9 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
       generatePDFContent(doc, data);
     };
     
-    img.onerror = function() {
-      console.log('Logo not found, using text branding');
+    img.onerror = function(error) {
+      console.error('PDF Generator - Logo failed to load:', error);
+      console.log('PDF Generator - Using text branding fallback');
       // Fallback to text branding with smaller font size
       doc.setFontSize(14);
       doc.setTextColor(0, 100, 200); // Celsia blue
@@ -54,7 +61,8 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
     return; // Exit early, content will be generated in the callback
     
   } catch (error) {
-    console.log('Error loading logo, using text branding');
+    console.error('PDF Generator - Error loading logo:', error);
+    console.log('PDF Generator - Using text branding fallback');
     // Fallback to text branding with smaller font size
     doc.setFontSize(14);
     doc.setTextColor(0, 100, 200); // Celsia blue
