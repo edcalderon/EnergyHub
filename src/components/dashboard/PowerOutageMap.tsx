@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import InteractiveMap from "./InteractiveMap";
 
 interface Outage {
   id: string;
@@ -168,42 +169,11 @@ export default function PowerOutageMap() {
       </div>
 
       <div className="p-6">
-        {/* Map Placeholder */}
-        <Card className="mb-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
-          <div className="aspect-video flex items-center justify-center relative overflow-hidden">
-            {/* Simulated Map Background */}
-            <div className="absolute inset-0 opacity-20">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-200 via-blue-200 to-purple-200 dark:from-green-900 dark:via-blue-900 dark:to-purple-900" />
-              <div className="absolute inset-0" style={{
-                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 35px, rgba(0,0,0,.03) 35px, rgba(0,0,0,.03) 36px),
-                                  repeating-linear-gradient(90deg, transparent, transparent 35px, rgba(0,0,0,.03) 35px, rgba(0,0,0,.03) 36px)`
-              }} />
-            </div>
-
-            {/* Map Markers */}
-            {filteredOutages.map((outage, index) => (
-              <div
-                key={outage.id}
-                className="absolute animate-pulse"
-                style={{
-                  left: `${20 + index * 20}%`,
-                  top: `${30 + (index % 2) * 30}%`,
-                }}
-              >
-                <div className={`w-4 h-4 rounded-full ${outage.type === "imprevisto" ? "bg-red-500" : "bg-orange-500"} shadow-lg`} />
-                <div className={`w-8 h-8 rounded-full ${outage.type === "imprevisto" ? "bg-red-500/30" : "bg-orange-500/30"} absolute -top-2 -left-2 animate-ping`} />
-              </div>
-            ))}
-
-            <div className="relative z-10 text-center p-8">
-              <MapPin className="h-12 w-12 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground">Mapa Interactivo de Valle del Cauca</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {filteredOutages.length} eventos detectados en tu zona
-              </p>
-            </div>
-          </div>
-        </Card>
+        {/* Interactive Map */}
+        <InteractiveMap 
+          selectedMunicipality={selectedMunicipality}
+          selectedType={selectedType}
+        />
 
         {/* Outage List */}
         <div className="space-y-4">
