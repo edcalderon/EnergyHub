@@ -1,8 +1,9 @@
-import { Leaf, TreePine, Droplets, Wind, Target, TrendingDown } from "lucide-react";
+import { Leaf, TreePine, Droplets, Wind, Target, TrendingDown, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { generateEcoFeedbackPDF, EcoFeedbackData } from "@/lib/pdf-generator";
 
 interface EcoMetric {
   icon: React.ReactNode;
@@ -79,6 +80,28 @@ const suggestions: Suggestion[] = [
 export default function EcoFeedbackSystem() {
   const sustainabilityGoal = 65;
   const currentProgress = 42;
+  const monthlySavings = 156000; // COP
+  const energyEfficiency = 87.5;
+  const peakHoursReduction = 15;
+  const offPeakHoursIncrease = 22;
+
+  const handleDownloadPDF = () => {
+    const ecoData: EcoFeedbackData = {
+      co2Emitted: 2.4,
+      treesEquivalent: 112,
+      virtualWater: 1850,
+      carbonFootprint: 3.2,
+      sustainabilityGoal,
+      currentProgress,
+      monthlySavings,
+      energyEfficiency,
+      peakHoursReduction,
+      offPeakHoursIncrease,
+      recommendations: suggestions
+    };
+    
+    generateEcoFeedbackPDF(ecoData);
+  };
 
   return (
     <Card className="bg-card border-border">
@@ -93,10 +116,20 @@ export default function EcoFeedbackSystem() {
               <p className="text-sm text-muted-foreground">Impacto ambiental y prácticas sostenibles</p>
             </div>
           </div>
-          <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-700 border-green-500/20">
-            <TrendingDown className="h-3 w-3" />
-            -12% este mes
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-700 border-green-500/20">
+              <TrendingDown className="h-3 w-3" />
+              -12% este mes
+            </Badge>
+            <Button 
+              onClick={handleDownloadPDF}
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Descargar PDF
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -115,6 +148,42 @@ export default function EcoFeedbackSystem() {
           ))}
         </div>
 
+        {/* Energy Behavior Indicators */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="p-4 bg-blue-500/10 border-blue-500/20">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-foreground">Eficiencia Energética</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{energyEfficiency}%</p>
+              <p className="text-xs text-muted-foreground">Índice de eficiencia actual</p>
+            </div>
+          </Card>
+          
+          <Card className="p-4 bg-orange-500/10 border-orange-500/20">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <TrendingDown className="h-4 w-4 text-orange-600" />
+                <span className="text-sm font-medium text-foreground">Reducción Horas Pico</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{peakHoursReduction}%</p>
+              <p className="text-xs text-muted-foreground">Menos consumo en horas pico</p>
+            </div>
+          </Card>
+          
+          <Card className="p-4 bg-green-500/10 border-green-500/20">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Leaf className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-foreground">Aumento Horas Valle</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{offPeakHoursIncrease}%</p>
+              <p className="text-xs text-muted-foreground">Más consumo en horas valle</p>
+            </div>
+          </Card>
+        </div>
+
         {/* Sustainability Goal */}
         <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-600/5 border-green-500/20">
           <div className="space-y-4">
@@ -129,6 +198,26 @@ export default function EcoFeedbackSystem() {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Reducir emisiones en {sustainabilityGoal}%</span>
               <span className="font-semibold text-green-600">Faltan {sustainabilityGoal - currentProgress}%</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Savings Summary */}
+        <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-600/5 border-blue-500/20">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-blue-600" />
+              <h3 className="font-semibold text-foreground">Ahorros Alcanzados</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Ahorro mensual</p>
+                <p className="text-2xl font-bold text-foreground">${monthlySavings.toLocaleString('es-CO')} COP</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Reducción de emisiones</p>
+                <p className="text-2xl font-bold text-green-600">-12% este mes</p>
+              </div>
             </div>
           </div>
         </Card>
