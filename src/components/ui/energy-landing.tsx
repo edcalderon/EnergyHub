@@ -286,7 +286,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
                     index === 0 ? "flex items-center gap-3 sm:gap-4 flex-wrap" : "block"
                   )}>
                     {index === 0 && (
-                      <div className="p-2 sm:p-3 md:p-4 lg:p-5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0">
+                      <div className="p-2 sm:p-3 md:p-4 lg:p-5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex-shrink-0" style={{ background: 'linear-gradient(135deg, #f4721e, #e55a00)' }}>
                         <Zap className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14 text-white" />
                       </div>
                     )}
@@ -304,7 +304,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
                   index === 0 ? "flex items-center gap-3 sm:gap-4" : "block"
                 )}>
                   {index === 0 && (
-                    <div className="p-2 sm:p-3 md:p-4 lg:p-5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0">
+                    <div className="p-2 sm:p-3 md:p-4 lg:p-5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex-shrink-0" style={{ background: 'linear-gradient(135deg, #f4721e, #e55a00)' }}>
                       <Zap className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14 text-white" />
                     </div>
                   )}
