@@ -28,22 +28,22 @@ export default function RootLayout({
     {
       label: "Dashboard",
       href: "/",
-      icon: <LayoutDashboard className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-6 w-6")} />,
+      icon: <LayoutDashboard className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-7 w-7")} />,
     },
     {
       label: "Tarifas",
       href: "/tarifas",
-      icon: <DollarSign className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-6 w-6")} />,
+      icon: <DollarSign className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-7 w-7")} />,
     },
     {
       label: "Eco-Feedback",
       href: "/eco-feedback",
-      icon: <Leaf className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-6 w-6")} />,
+      icon: <Leaf className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-7 w-7")} />,
     },
     {
       label: "Mapa de Cortes",
       href: "/mapa-cortes",
-      icon: <MapPin className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-6 w-6")} />,
+      icon: <MapPin className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-7 w-7")} />,
     },
   ];
 
@@ -66,7 +66,13 @@ export default function RootLayout({
                   </div>
                   <span className="text-foreground font-semibold text-sm">EnergyHub</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <ThemeSwitcher open={false} />
+                  <Link href="/profile" className="p-2 rounded-full hover:bg-accent transition-colors">
+                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-xs">
+                      U
+                    </div>
+                  </Link>
                   <NotificationDropdown open={false} animate={false} />
                   <Menu
                     className="text-foreground cursor-pointer hover:bg-accent rounded-full p-2 h-10 w-10 flex items-center justify-center transition-colors"
@@ -117,14 +123,19 @@ export default function RootLayout({
                 <SidebarBody open={sidebarOpen} setOpen={setSidebarOpen} animate={true} className="justify-between gap-10">
                   {/* Logo Section */}
                   <div className="mb-8">
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/" className={cn(
+                      "flex items-center",
+                      sidebarOpen ? "gap-2" : "justify-center"
+                    )}>
                       <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0">
-                        <Zap className="h-5 w-5 text-white" />
+                        <Zap className={cn("text-white", sidebarOpen ? "h-5 w-5" : "h-6 w-6")} />
                       </div>
-                      <div className="flex flex-col">
-                        <h2 className="text-lg font-semibold text-foreground">EnergyHub</h2>
-                        <p className="text-sm text-muted-foreground">Gestión Energética</p>
-                      </div>
+                      {sidebarOpen && (
+                        <div className="flex flex-col">
+                          <h2 className="text-lg font-semibold text-foreground">EnergyHub</h2>
+                          <p className="text-sm text-muted-foreground">Gestión Energética</p>
+                        </div>
+                      )}
                     </Link>
                   </div>
 
@@ -158,14 +169,16 @@ export default function RootLayout({
                         label: "Usuario",
                         href: "/profile",
                         icon: (
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-xs flex-shrink-0">
+                          <div className={cn(
+                            "rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium flex-shrink-0",
+                            sidebarOpen ? "h-8 w-8 text-xs" : "h-10 w-10 text-sm"
+                          )}>
                             U
                           </div>
                         ),
                       }}
                       open={sidebarOpen}
                       animate={true}
-                      iconOnly={false}
                       onClick={() => setSidebarOpen(false)}
                     />
                   </div>

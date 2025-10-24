@@ -206,7 +206,7 @@ export const SidebarLink = ({
   onClick?: () => void;
   props?: LinkProps;
 }) => {
-  // Always show text if forced (mobile) or if not iconOnly and sidebar is open
+  // Show text only if forced (mobile) or if sidebar is open and not iconOnly
   const shouldShowText = iconOnly ? false : (forceShowText || open);
 
   const handleClick = () => {
@@ -221,14 +221,19 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center gap-2 group/sidebar py-2 px-1 rounded-lg hover:bg-accent transition-colors",
-        animate && !open ? "justify-center" : "justify-start",
+        "flex items-center group/sidebar py-2 px-1 rounded-lg hover:bg-accent transition-colors",
+        animate && !open ? "justify-center w-full" : "justify-start gap-2",
         className
       )}
       onClick={handleClick}
       {...props}
     >
-      {link.icon}
+      <div className={cn(
+        "flex items-center justify-center",
+        animate && !open ? "w-10 h-10" : "w-auto h-auto"
+      )}>
+        {link.icon}
+      </div>
       {shouldShowText && (
         <motion.span
           animate={{
