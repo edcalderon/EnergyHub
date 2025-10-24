@@ -22,33 +22,67 @@ export interface EcoFeedbackData {
 export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   const doc = new jsPDF();
   
-  // Add Celsia logo (you'll need to add the image to public folder)
+  // Add Celsia logo
   try {
-    // For now, we'll add a placeholder for the logo
-    // In production, you would load the actual image
-    doc.setFontSize(16);
-    doc.setTextColor(0, 100, 200); // Celsia blue
-    doc.text('Celsia', 20, 20);
+    // Load the Celsia logo from public folder
+    const logoUrl = '/celsia.png';
+    
+    // Create an image element to load the logo
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = function() {
+      // Add smaller logo to PDF (1:1 ratio - smaller size)
+      doc.addImage(img, 'PNG', 20, 5, 30, 30);
+      
+      // Continue with the rest of the PDF generation
+      generatePDFContent(doc, data);
+    };
+    
+    img.onerror = function() {
+      console.log('Logo not found, using text branding');
+      // Fallback to text branding with smaller font size
+      doc.setFontSize(14);
+      doc.setTextColor(0, 100, 200); // Celsia blue
+      doc.text('Celsia', 20, 15);
+      
+      // Continue with the rest of the PDF generation
+      generatePDFContent(doc, data);
+    };
+    
+    img.src = logoUrl;
+    return; // Exit early, content will be generated in the callback
+    
   } catch (error) {
-    console.log('Logo not found, using text branding');
+    console.log('Error loading logo, using text branding');
+    // Fallback to text branding with smaller font size
+    doc.setFontSize(14);
+    doc.setTextColor(0, 100, 200); // Celsia blue
+    doc.text('Celsia', 20, 15);
+    
+    // Continue with the rest of the PDF generation
+    generatePDFContent(doc, data);
   }
+}
+
+function generatePDFContent(doc: jsPDF, data: EcoFeedbackData): void {
   
-  // Header with better spacing
+  // Header with better spacing (adjusted for smaller logo)
   doc.setFontSize(18);
   doc.setTextColor(34, 197, 94); // Green color
-  doc.text('EnergyHub', 20, 35);
+  doc.text('EnergyHub', 60, 20); // Adjusted for 30x30 logo
   
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text('Sistema de Gestión Energética - Valle del Cauca', 20, 42);
-  doc.text(`Fecha: ${new Date().toLocaleDateString('es-CO')}`, 20, 50);
+  doc.text('Sistema de Gestión Energética - Valle del Cauca', 60, 27);
+  doc.text(`Fecha: ${new Date().toLocaleDateString('es-CO')}`, 60, 34);
   
   // Line separator
   doc.setDrawColor(34, 197, 94);
   doc.setLineWidth(0.5);
-  doc.line(20, 55, 190, 55);
+  doc.line(20, 40, 190, 40);
   
-  let yPosition = 70;
+  let yPosition = 50; // Adjusted for smaller logo (30x30)
   
   // Environmental Impact Section
   doc.setFontSize(16);
