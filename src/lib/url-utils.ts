@@ -74,17 +74,31 @@ export function getAssetUrl(path: string): string {
 /**
  * Generate a proper internal link URL that works in both development and production
  * @param path - The internal path (e.g., '/dashboard')
- * @returns The full URL for the internal link
+ * @returns The relative path for Next.js Link component
  */
 export function getInternalUrl(path: string): string {
   // Ensure path starts with '/'
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   
+  // For Next.js Link component, we need to return the path relative to the base path
+  // Next.js will automatically handle the base URL and basePath from next.config.js
+  return normalizedPath;
+}
+
+/**
+ * Generate a full internal URL (for use outside of Next.js Link components)
+ * @param path - The internal path (e.g., '/dashboard')
+ * @returns The full URL for the internal link
+ */
+export function getFullInternalUrl(path: string): string {
+  // Ensure path starts with '/'
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  
   if (process.env.NODE_ENV === 'production') {
-    return `${getBasePath()}${normalizedPath}`;
+    return `${getBaseUrl()}${getBasePath()}${normalizedPath}`;
   }
   
-  return normalizedPath;
+  return `${getBaseUrl()}${normalizedPath}`;
 }
 
 /**
@@ -201,6 +215,8 @@ export function debugUrls(context: string = 'URL Debug'): void {
     basePath: getBasePath(),
     celsiaLogoUrl: getCelsiaLogoUrl(),
     celsiaLogoUrlForPDF: getCelsiaLogoUrlForPDF(),
+    internalUrl: getInternalUrl('/dashboard'),
+    fullInternalUrl: getFullInternalUrl('/dashboard'),
     isProduction: isProduction(),
     envVariables: getUrlEnvironmentVariables()
   };
