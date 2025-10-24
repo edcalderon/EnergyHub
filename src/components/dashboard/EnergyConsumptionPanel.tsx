@@ -3,8 +3,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ReactECharts from 'echarts-for-react';
+import { useTheme } from "next-themes";
+import * as echarts from 'echarts';
 
 export default function EnergyConsumptionPanel() {
+  const { theme } = useTheme();
+  
   // Mock data for energy consumption
   const mockData = {
     currentConsumption: 1247,
@@ -35,6 +40,257 @@ export default function EnergyConsumptionPanel() {
   };
 
   const percentageChange = ((mockData.currentConsumption - mockData.previousConsumption) / mockData.previousConsumption) * 100;
+
+  // ECharts configurations
+  const chartTheme = theme === 'dark' ? 'dark' : 'light';
+  
+  // Daily chart configuration
+  const dailyChartOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        const data = params[0];
+        const hour = data.axisValue;
+        const value = data.value;
+        const isPeak = mockData.peakHours.includes(parseInt(hour));
+        const isOffPeak = mockData.offPeakHours.includes(parseInt(hour));
+        let type = 'Normal';
+        if (isPeak) type = 'Pico';
+        if (isOffPeak) type = 'Valle';
+        return `${hour}:00<br/>${value} kWh<br/>Tipo: ${type}`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: Array.from({length: 24}, (_, i) => `${i}:00`),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+        interval: 3
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [{
+      data: mockData.dailyConsumption.map((value, index) => ({
+        value,
+        itemStyle: {
+          color: mockData.peakHours.includes(index) 
+            ? '#ef4444' 
+            : mockData.offPeakHours.includes(index) 
+            ? '#22c55e' 
+            : '#3b82f6'
+        }
+      })),
+      type: 'bar',
+      barWidth: '60%',
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }]
+  };
+
+  // Weekly chart configuration
+  const weeklyChartOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        const data = params[0];
+        const day = data.axisValue;
+        const consumption = data.value;
+        const cost = mockData.weeklyConsumption.find(item => item.day === day)?.cost || 0;
+        return `${day}<br/>Consumo: ${consumption} kWh<br/>Costo: $${cost.toLocaleString('es-CO')} COP`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: mockData.weeklyConsumption.map(item => item.day),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [{
+      data: mockData.weeklyConsumption.map(item => item.value),
+      type: 'bar',
+      barWidth: '60%',
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: '#3b82f6' },
+          { offset: 1, color: '#1d4ed8' }
+        ])
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }]
+  };
+
+  // Monthly chart configuration
+  const monthlyChartOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        const data = params[0];
+        const month = data.axisValue;
+        const consumption = data.value;
+        const cost = mockData.monthlyConsumption.find(item => item.month === month)?.cost || 0;
+        return `${month}<br/>Consumo: ${consumption} kWh<br/>Costo: $${(cost / 1000000).toFixed(1)}M COP`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: mockData.monthlyConsumption.map(item => item.month),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [{
+      data: mockData.monthlyConsumption.map(item => item.value),
+      type: 'line',
+      smooth: true,
+      lineStyle: {
+        width: 3,
+        color: '#3b82f6'
+      },
+      itemStyle: {
+        color: '#3b82f6',
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
+          { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
+        ])
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }]
+  };
 
   return (
     <Card className="bg-card border-border">
@@ -124,29 +380,12 @@ export default function EnergyConsumptionPanel() {
                 <span className="text-muted-foreground">Consumo por hora</span>
                 <Badge variant="outline">Últimas 24h</Badge>
               </div>
-              {/* Enhanced bar chart with peak hours highlighting */}
-              <div className="h-48 sm:h-64 flex items-end justify-between gap-1 sm:gap-2">
-                {mockData.dailyConsumption.map((value, index) => {
-                  const isPeakHour = mockData.peakHours.includes(index);
-                  const isOffPeakHour = mockData.offPeakHours.includes(index);
-                  
-                  return (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-1">
-                      <div
-                        className={`w-full rounded-t transition-all cursor-pointer ${
-                          isPeakHour 
-                            ? 'bg-gradient-to-t from-red-500 to-red-400 hover:from-red-600 hover:to-red-500' 
-                            : isOffPeakHour 
-                            ? 'bg-gradient-to-t from-green-500 to-green-400 hover:from-green-600 hover:to-green-500'
-                            : 'bg-gradient-to-t from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500'
-                        }`}
-                        style={{ height: `${value}%` }}
-                        title={`${value} kWh - ${index}:00`}
-                      />
-                      {index % 4 === 0 && <span className="text-xs text-muted-foreground">{index}h</span>}
-                    </div>
-                  );
-                })}
+              <div className="h-80">
+                <ReactECharts 
+                  option={dailyChartOption} 
+                  style={{ height: '100%', width: '100%' }}
+                  theme={chartTheme}
+                />
               </div>
               <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
@@ -171,18 +410,12 @@ export default function EnergyConsumptionPanel() {
                 <span className="text-muted-foreground">Consumo por día</span>
                 <Badge variant="outline">Esta semana</Badge>
               </div>
-              <div className="h-48 sm:h-64 flex items-end justify-between gap-2 sm:gap-4">
-                {mockData.weeklyConsumption.map((item, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div
-                      className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t hover:from-blue-600 hover:to-blue-500 transition-all cursor-pointer"
-                      style={{ height: `${item.value}%` }}
-                      title={`${item.value} kWh - $${item.cost.toLocaleString('es-CO')} COP`}
-                    />
-                    <span className="text-xs text-muted-foreground font-medium">{item.day}</span>
-                    <span className="text-xs text-muted-foreground">${item.cost.toLocaleString('es-CO')}</span>
-                  </div>
-                ))}
+              <div className="h-80">
+                <ReactECharts 
+                  option={weeklyChartOption} 
+                  style={{ height: '100%', width: '100%' }}
+                  theme={chartTheme}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div className="p-3 bg-muted/50 rounded-lg">
@@ -207,18 +440,12 @@ export default function EnergyConsumptionPanel() {
                 <span className="text-muted-foreground">Comparativa mensual</span>
                 <Badge variant="outline">Últimos 6 meses</Badge>
               </div>
-              <div className="h-48 sm:h-64 flex items-end justify-between gap-2 sm:gap-4">
-                {mockData.monthlyConsumption.map((item, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div
-                      className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t hover:from-blue-600 hover:to-blue-500 transition-all cursor-pointer"
-                      style={{ height: `${item.value}%` }}
-                      title={`${item.value} kWh - $${item.cost.toLocaleString('es-CO')} COP`}
-                    />
-                    <span className="text-xs text-muted-foreground font-medium">{item.month}</span>
-                    <span className="text-xs text-muted-foreground">${(item.cost / 1000000).toFixed(1)}M</span>
-                  </div>
-                ))}
+              <div className="h-80">
+                <ReactECharts 
+                  option={monthlyChartOption} 
+                  style={{ height: '100%', width: '100%' }}
+                  theme={chartTheme}
+                />
               </div>
               <div className="grid grid-cols-3 gap-4 mt-4">
                 <div className="p-3 bg-muted/50 rounded-lg text-center">
