@@ -22,14 +22,25 @@ export interface EcoFeedbackData {
 export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   const doc = new jsPDF();
   
-  // Header
-  doc.setFontSize(20);
-  doc.setTextColor(34, 197, 94); // Green color
-  doc.text('Reporte de Eco-Feedback', 20, 30);
+  // Add Celsia logo (you'll need to add the image to public folder)
+  try {
+    // For now, we'll add a placeholder for the logo
+    // In production, you would load the actual image
+    doc.setFontSize(16);
+    doc.setTextColor(0, 100, 200); // Celsia blue
+    doc.text('Celsia', 20, 20);
+  } catch (error) {
+    console.log('Logo not found, using text branding');
+  }
   
-  doc.setFontSize(12);
+  // Header with better spacing
+  doc.setFontSize(18);
+  doc.setTextColor(34, 197, 94); // Green color
+  doc.text('EnergyHub', 20, 35);
+  
+  doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text('Sistema de Gestión Energética - Valle del Cauca', 20, 40);
+  doc.text('Sistema de Gestión Energética - Valle del Cauca', 20, 42);
   doc.text(`Fecha: ${new Date().toLocaleDateString('es-CO')}`, 20, 50);
   
   // Line separator
@@ -47,29 +58,29 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text('Indicadores clave de sostenibilidad y eficiencia energética:', 20, yPosition);
+  doc.text('Indicadores de sostenibilidad y eficiencia:', 20, yPosition);
   yPosition += 15;
   
   // CO2 Emissions
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
-  doc.text('• Emisiones de CO₂:', 20, yPosition);
-  doc.text(`${data.co2Emitted} toneladas/mes`, 80, yPosition);
+  doc.text('• CO₂ Emitido:', 20, yPosition);
+  doc.text(`${data.co2Emitted} ton/mes`, 70, yPosition);
   yPosition += 8;
   
   // Trees Equivalent
-  doc.text('• Árboles equivalentes necesarios:', 20, yPosition);
-  doc.text(`${data.treesEquivalent} árboles`, 80, yPosition);
+  doc.text('• Árboles equivalentes:', 20, yPosition);
+  doc.text(`${data.treesEquivalent} árboles`, 70, yPosition);
   yPosition += 8;
   
   // Virtual Water
-  doc.text('• Agua virtual consumida:', 20, yPosition);
-  doc.text(`${data.virtualWater.toLocaleString()} litros/mes`, 80, yPosition);
+  doc.text('• Agua virtual:', 20, yPosition);
+  doc.text(`${data.virtualWater.toLocaleString()} L/mes`, 70, yPosition);
   yPosition += 8;
   
   // Carbon Footprint
-  doc.text('• Huella de carbono:', 20, yPosition);
-  doc.text(`${data.carbonFootprint} kg CO₂/kWh`, 80, yPosition);
+  doc.text('• Huella carbono:', 20, yPosition);
+  doc.text(`${data.carbonFootprint} kg CO₂/kWh`, 70, yPosition);
   yPosition += 15;
   
   // Energy Efficiency Section
@@ -83,20 +94,20 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   yPosition += 15;
   
   // Energy Efficiency
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
-  doc.text('• Eficiencia energética actual:', 20, yPosition);
-  doc.text(`${data.energyEfficiency}%`, 80, yPosition);
+  doc.text('• Eficiencia actual:', 20, yPosition);
+  doc.text(`${data.energyEfficiency}%`, 70, yPosition);
   yPosition += 8;
   
   // Peak Hours Reduction
-  doc.text('• Reducción en horas pico:', 20, yPosition);
-  doc.text(`${data.peakHoursReduction}%`, 80, yPosition);
+  doc.text('• Reducción horas pico:', 20, yPosition);
+  doc.text(`${data.peakHoursReduction}%`, 70, yPosition);
   yPosition += 8;
   
   // Off-peak Hours Increase
-  doc.text('• Aumento en horas valle:', 20, yPosition);
-  doc.text(`${data.offPeakHoursIncrease}%`, 80, yPosition);
+  doc.text('• Aumento horas valle:', 20, yPosition);
+  doc.text(`${data.offPeakHoursIncrease}%`, 70, yPosition);
   yPosition += 15;
   
   // Savings Section
@@ -110,15 +121,15 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   yPosition += 15;
   
   // Monthly Savings
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
   doc.text('• Ahorro mensual:', 20, yPosition);
-  doc.text(`$${data.monthlySavings.toLocaleString('es-CO')} COP`, 80, yPosition);
+  doc.text(`$${data.monthlySavings.toLocaleString('es-CO')}`, 70, yPosition);
   yPosition += 8;
   
   // Sustainability Progress
-  doc.text('• Progreso hacia meta de sostenibilidad:', 20, yPosition);
-  doc.text(`${data.currentProgress}% de ${data.sustainabilityGoal}%`, 80, yPosition);
+  doc.text('• Progreso sostenibilidad:', 20, yPosition);
+  doc.text(`${data.currentProgress}% de ${data.sustainabilityGoal}%`, 70, yPosition);
   yPosition += 15;
   
   // Recommendations Section
@@ -128,7 +139,7 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text('Prácticas recomendadas para mejorar la eficiencia:', 20, yPosition);
+  doc.text('Prácticas recomendadas para mejorar eficiencia:', 20, yPosition);
   yPosition += 15;
   
   data.recommendations.forEach((rec, index) => {
@@ -142,15 +153,18 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
     doc.text(`${index + 1}. ${rec.title}`, 20, yPosition);
     yPosition += 8;
     
+    // Split long descriptions into multiple lines
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
-    doc.text(rec.description, 25, yPosition);
-    yPosition += 8;
+    const maxWidth = 160; // Maximum width for text
+    const splitText = doc.splitTextToSize(rec.description, maxWidth);
+    doc.text(splitText, 25, yPosition);
+    yPosition += splitText.length * 4;
     
     doc.setFontSize(9);
     doc.setTextColor(34, 197, 94);
     doc.text(`Impacto: ${rec.impact}`, 25, yPosition);
-    yPosition += 8;
+    yPosition += 6;
     
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
@@ -161,9 +175,17 @@ export function generateEcoFeedbackPDF(data: EcoFeedbackData): void {
   // Footer
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text('Generado por EnergyHub - Sistema de Gestión Energética', 20, 280);
+  doc.text('EnergyHub by Celsia - Sistema de Gestión Energética', 20, 280);
   doc.text('Valle del Cauca, Colombia', 20, 285);
   
+  // Add Celsia branding
+  doc.setFontSize(10);
+  doc.setTextColor(0, 100, 200);
+  doc.text('Celsia', 160, 280);
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Energía para el futuro', 160, 285);
+  
   // Save the PDF
-  doc.save(`eco-feedback-report-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`energyhub-eco-feedback-${new Date().toISOString().split('T')[0]}.pdf`);
 }
