@@ -187,7 +187,7 @@ export default function RootLayout({
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 w-full min-h-screen bg-background relative z-20 pt-16 md:pt-0 overflow-y-auto">
+            <div className="flex-1 w-full min-h-screen bg-background relative z-20 pt-16 md:pt-0 md:overflow-y-auto md:h-screen">
               {/* Desktop Floating Notification - Hidden on mobile */}
               {!isNotificationsPage && (
                 <div className={cn(
