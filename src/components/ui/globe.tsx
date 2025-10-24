@@ -19,9 +19,9 @@ const Globe: React.FC = () => {
         <div
           className="relative w-[250px] h-[250px] rounded-full overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.2),-5px_0_8px_#c3f4ff_inset,15px_2px_25px_#000_inset,-24px_-2px_34px_#c3f4ff99_inset,250px_0_44px_#00000066_inset,150px_0_38px_#000000aa_inset]"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=400&h=400&fit=crop&crop=center')",
+            backgroundImage: "url('https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/globe.jpeg')",
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "left",
             animation: "earthRotate 30s linear infinite",
           }}
         >

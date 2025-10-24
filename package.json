@@ -1,4 +1,7 @@
 {
+  "name": "energyhub",
+  "version": "0.1.0",
+  "description": "Sistema global de monitoreo energético inteligente con análisis en tiempo real y prácticas sostenibles",
   "private": true,
   "scripts": {
     "dev": "next dev",

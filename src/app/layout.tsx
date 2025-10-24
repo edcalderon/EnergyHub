@@ -23,11 +23,12 @@ export default function RootLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const isNotificationsPage = pathname === "/notifications";
+  const isLandingPage = pathname === "/";
 
   const sidebarLinks = [
     {
       label: "Dashboard",
-      href: "/",
+      href: "/dashboard",
       icon: <LayoutDashboard className={cn("text-foreground", sidebarOpen ? "h-5 w-5" : "h-7 w-7")} />,
     },
     {
@@ -49,6 +50,18 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>EnergyHub by Celsia - Gestión Energética Inteligente</title>
+        <meta name="description" content="Sistema global de monitoreo energético inteligente con insights en tiempo real y prácticas sostenibles. Piloto implementado en Valle del Cauca, Colombia." />
+        <meta name="keywords" content="energía, sostenibilidad, monitoreo energético, Celsia, Valle del Cauca, gestión energética" />
+        <meta name="author" content="Celsia" />
+        <meta property="og:title" content="EnergyHub by Celsia - Gestión Energética Inteligente" />
+        <meta property="og:description" content="Sistema global de monitoreo energético inteligente con insights en tiempo real y prácticas sostenibles." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="EnergyHub by Celsia" />
+        <meta name="twitter:description" content="Gestión Energética Inteligente - Monitoreo en tiempo real" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
@@ -57,9 +70,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="min-h-screen bg-background flex flex-col md:flex-row">
-            {/* Mobile Header */}
-            <div className="md:hidden">
-              <div className="sticky top-0 h-16 px-4 py-3 flex flex-row items-center justify-between bg-background border-b border-border w-full shadow-sm z-50">
+            {/* Mobile Header - Hide on landing page */}
+            {!isLandingPage && (
+              <div className="md:hidden">
+                <div className="sticky top-0 h-16 px-4 py-3 flex flex-row items-center justify-between bg-background border-b border-border w-full shadow-sm z-50">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600">
                     <Zap className="h-4 w-4 text-white" />
@@ -115,9 +129,11 @@ export default function RootLayout({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+              </div>
+            )}
 
-            {/* Desktop Sidebar */}
+            {/* Desktop Sidebar - Hide on landing page */}
+            {!isLandingPage && (
             <div className="hidden md:block">
               <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
                 <SidebarBody open={sidebarOpen} setOpen={setSidebarOpen} animate={true} className="justify-between gap-10">
@@ -185,11 +201,15 @@ export default function RootLayout({
                 </SidebarBody>
               </Sidebar>
             </div>
+            )}
 
             {/* Main Content */}
-            <div className="flex-1 w-full min-h-screen bg-background relative z-20 pt-16 md:pt-0 md:overflow-y-auto md:h-screen">
-              {/* Desktop Floating Notification - Hidden on mobile */}
-              {!isNotificationsPage && (
+            <div className={cn(
+              "flex-1 w-full min-h-screen bg-background relative z-20",
+              isLandingPage ? "pt-0" : "pt-16 md:pt-0 md:overflow-y-auto md:h-screen"
+            )}>
+              {/* Desktop Floating Notification - Hidden on mobile and landing page */}
+              {!isNotificationsPage && !isLandingPage && (
                 <div className={cn(
                   "absolute z-50 transition-all duration-300 hidden md:block",
                   sidebarOpen ? "top-4 right-4" : "top-4 right-4"
