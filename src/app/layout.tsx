@@ -66,12 +66,19 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    localStorage.setItem('theme', 'light');
+                  if (typeof window !== 'undefined') {
+                    const theme = localStorage.getItem('energyhub-theme') || 'light';
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add(theme);
+                    if (theme === 'celsia') {
+                      document.documentElement.setAttribute('data-theme', 'celsia');
+                    } else {
+                      document.documentElement.removeAttribute('data-theme');
+                    }
                   }
-                  document.documentElement.classList.remove('dark');
-                  document.documentElement.classList.add('light');
-                } catch (e) {}
+                } catch (e) {
+                  console.error('Theme initialization error:', e);
+                }
               })();
             `,
           }}

@@ -30,13 +30,21 @@ export function ThemeProvider({
   storageKey = "energyhub-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
 
+  // Initialize theme from localStorage on client side only
   useEffect(() => {
-    const root = window.document.documentElement;
+    const storedTheme = localStorage.getItem(storageKey) as Theme;
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+  }, [storageKey]);
 
+  // Apply theme changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const root = window.document.documentElement;
     root.classList.remove("light", "celsia");
     
     if (theme === "celsia") {
