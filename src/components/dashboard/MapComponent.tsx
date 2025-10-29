@@ -143,11 +143,12 @@ export default function MapComponent({ selectedMunicipality = "todos", selectedT
       </div>
 
       {/* Map Container */}
-      <div className="h-[500px] w-full relative">
+      <div className="h-[500px] w-full relative bg-white dark:bg-background [data-theme='celsia']:bg-[hsl(var(--background))] rounded-lg overflow-hidden border border-[hsl(var(--border))]">
         {/* Embedded OpenStreetMap */}
         <iframe
           key={selectedCity} // Force reload when city changes
           src={mapUrl}
+          className="w-full h-full"
           width="100%"
           height="100%"
           style={{ border: 0 }}

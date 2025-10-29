@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell, AlertTriangle, TrendingUp, Lightbulb, X, Check, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { mockNotifications, formatTimestamp, Notification } from "@/lib/notifications";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface NotificationDropdownProps {
   className?: string;
@@ -19,7 +23,31 @@ interface NotificationDropdownProps {
 }
 
 export default function NotificationDropdown({ className, open = false, animate = false }: NotificationDropdownProps) {
-  const unreadCount = mockNotifications.filter((n: Notification) => !n.read).length;
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const unreadCount = notifications.filter((n: Notification) => !n.read).length;
+  const router = useRouter();
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === id 
+          ? { ...notification, read: true }
+          : notification
+      )
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, read: true }))
+    );
+  };
+
+  const dismissNotification = (id: string) => {
+    setNotifications(prev => 
+      prev.filter(notification => notification.id !== id)
+    );
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -80,14 +108,14 @@ export default function NotificationDropdown({ className, open = false, animate 
         </div>
 
         <ScrollArea className="h-[400px]">
-          {mockNotifications.length === 0 ? (
+          {notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No hay notificaciones nuevas</p>
             </div>
           ) : (
             <div className="p-2">
-              {mockNotifications.map((notification: Notification, index: number) => (
+              {notifications.map((notification: Notification, index: number) => (
                 <div key={notification.id}>
                   <div
                     className={`p-3 rounded-lg transition-colors hover:bg-muted/50 ${
@@ -130,11 +158,23 @@ export default function NotificationDropdown({ className, open = false, animate 
                           </span>
                           {notification.actionable && (
                             <div className="flex gap-1">
-                              <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-6 px-2 text-xs"
+                                onClick={() => dismissNotification(notification.id)}
+                              >
                                 <X className="h-3 w-3 mr-1" />
                                 Ignorar
                               </Button>
-                              <Button size="sm" className="h-6 px-2 text-xs">
+                              <Button 
+                                size="sm" 
+                                className="h-6 px-2 text-xs"
+                                onClick={() => {
+                                  markAsRead(notification.id);
+                                  router.push('/notifications');
+                                }}
+                              >
                                 <Check className="h-3 w-3 mr-1" />
                                 Ver
                               </Button>
@@ -144,7 +184,7 @@ export default function NotificationDropdown({ className, open = false, animate 
                       </div>
                     </div>
                   </div>
-                  {index < mockNotifications.length - 1 && (
+                  {index < notifications.length - 1 && (
                     <Separator className="my-1" />
                   )}
                 </div>
@@ -153,10 +193,16 @@ export default function NotificationDropdown({ className, open = false, animate 
           )}
         </ScrollArea>
 
-        {mockNotifications.length > 0 && (
+        {notifications.length > 0 && (
           <div className="p-3 border-t">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" className="text-xs">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs"
+                onClick={markAllAsRead}
+                disabled={unreadCount === 0}
+              >
                 Marcar todas como leídas
               </Button>
               <Link href="/notifications">

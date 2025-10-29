@@ -95,7 +95,9 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-screen px-2 py-4 hidden md:flex md:flex-col bg-background w-[300px] flex-shrink-0 md:sticky md:top-0 md:overflow-y-auto",
+        "h-screen px-2 py-4 hidden md:flex md:flex-col w-[300px] flex-shrink-0 md:sticky md:top-0 md:overflow-y-auto",
+        "bg-white dark:bg-background border-r border-[hsl(var(--border))]",
+        "[data-theme='celsia']:bg-[hsl(var(--background))]",
         className
       )}
       animate={{
@@ -103,6 +105,7 @@ export const DesktopSidebar = ({
       }}
       onMouseEnter={() => setOpen?.(true)}
       onMouseLeave={() => setOpen?.(false)}
+      data-theme="celsia"
       {...props}
     >
       {children}
@@ -221,19 +224,25 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center group/sidebar py-2 px-1 rounded-lg hover:bg-accent transition-colors",
-        animate && !open ? "justify-center w-full" : "justify-start gap-2",
+        "flex items-center group/sidebar py-2 px-3 rounded-lg transition-all duration-300 ease-in-out",
+        "hover:bg-accent/10 hover:text-orange-500 transform hover:scale-[1.03] origin-left",
+        "celsia:hover:bg-orange-500/10 celsia:hover:text-orange-400",
+        animate && !open ? "justify-center w-full" : "justify-start gap-3",
         className
       )}
       onClick={handleClick}
       {...props}
     >
-      <div className={cn(
-        "flex items-center justify-center",
-        animate && !open ? "w-10 h-10" : "w-auto h-auto"
-      )}>
+      <motion.div 
+        className={cn(
+          "flex items-center justify-center transition-transform duration-300 group-hover/sidebar:scale-110",
+          animate && !open ? "w-10 h-10" : "w-auto h-auto"
+        )}
+        whileHover={{ scale: 1.1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      >
         {link.icon}
-      </div>
+      </motion.div>
       {shouldShowText && (
         <motion.span
           animate={{

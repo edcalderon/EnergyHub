@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
             {/* Quick Access Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Link href="/tarifas">
+              <Link href="/tarifas" onClick={() => sessionStorage.setItem('fromDashboard', 'true')}>
                 <Card className="p-6 hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 rounded-lg bg-green-500/10">
@@ -62,7 +62,7 @@ export default function DashboardPage() {
                 </Card>
               </Link>
 
-              <Link href="/mapa-cortes">
+              <Link href="/mapa-cortes" onClick={() => sessionStorage.setItem('fromDashboard', 'true')}>
                 <Card className="p-6 hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 rounded-lg bg-red-500/10">

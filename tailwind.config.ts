@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config = {
-  darkMode: ["class"],
+  darkMode: ["class", '[data-theme="celsia"]'],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -19,6 +19,29 @@ const config = {
     },
     extend: {
       colors: {
+        // Celsia Theme - Light Orange
+        celsia: {
+          background: '#ffffff',
+          foreground: '#1f2937',
+          primary: '#f97316',
+          'primary-foreground': '#ffffff',
+          secondary: '#fb923c',
+          'secondary-foreground': '#1f2937',
+          accent: '#f59e0b',
+          'accent-foreground': '#1f2937',
+          muted: '#f3f4f6',
+          'muted-foreground': '#6b7280',
+          border: '#f3e8ff',
+          input: '#e5e7eb',
+          ring: '#f97316',
+          card: '#ffffff',
+          'card-foreground': '#1f2937',
+          popover: '#ffffff',
+          'popover-foreground': '#1f2937',
+          destructive: '#ef4444',
+          'destructive-foreground': '#ffffff',
+        },
+        // Default Theme
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
