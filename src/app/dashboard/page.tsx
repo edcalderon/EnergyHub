@@ -45,7 +45,7 @@ export default function DashboardPage() {
                 </Card>
               </Link>
 
-              <Link href="/eco-feedback">
+              <Link href="/eco-feedback" onClick={() => sessionStorage.setItem('fromDashboard', 'true')}>
                 <Card className="p-6 hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 rounded-lg bg-green-500/10">

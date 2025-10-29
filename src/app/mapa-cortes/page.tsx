@@ -184,14 +184,21 @@ export default function MapaCortesPage() {
   }, []);
 
   useEffect(() => {
-    const fromDashboard = sessionStorage.getItem("fromDashboard");
-    if (fromDashboard === "true") {
-      setShowBackButton(true);
-      sessionStorage.removeItem("fromDashboard");
-    }
+    // Check if we came from the dashboard
+    const fromDashboard = sessionStorage.getItem("fromDashboard") === "true";
+    setShowBackButton(fromDashboard);
+    
+    // Clean up the flag when component unmounts
+    return () => {
+      if (fromDashboard) {
+        sessionStorage.removeItem("fromDashboard");
+      }
+    };
   }, []);
 
   const handleBackToDashboard = () => {
+    // Remove the flag when going back to dashboard
+    sessionStorage.removeItem("fromDashboard");
     router.push("/dashboard");
   };
 
@@ -227,15 +234,17 @@ export default function MapaCortesPage() {
 
 
       {/* Main Content */}
-      <main className="w-full max-w-full px-2 sm:px-4 py-4 md:py-8 lg:pt-16">
+      <main className="w-full max-w-full px-4 sm:px-6 py-4 md:py-8 lg:pt-8">
         {/* Title Section */}
-        <div className="mb-4 sm:mb-6 md:mb-8 px-2 sm:px-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-            Mapa de Cortes
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Visualización en tiempo real de interrupciones programadas y no programadas
-          </p>
+        <div className="w-full max-w-7xl mx-auto mb-4 sm:mb-6 md:mb-8 px-0">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Mapa de Cortes
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Visualización en tiempo real de interrupciones programadas y no programadas
+            </p>
+          </div>
         </div>
 
         {/* Map Container */}
