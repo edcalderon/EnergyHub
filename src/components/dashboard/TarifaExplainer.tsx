@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { getAssetUrl } from "@/lib/url-utils";
 
 type ComponentKey = "G" | "T" | "D" | "C" | "Perdidas" | "Otros";
 
@@ -16,7 +17,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el costo de producir la energía que llega a tu empresa; depende del clima, los combustibles y la disponibilidad de las plantas generadoras.",
     color: "#1f77b4",
-    image: "/images/generacion.png",
+    image: getAssetUrl("/images/generacion.png"),
     example: "Ejemplo: cuando hay sequía y baja el nivel de los embalses, el costo de generación suele subir.",
   },
   T: {
@@ -24,7 +25,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el peaje eléctrico por usar las autopistas de alta tensión que llevan la energía desde las plantas hasta tu región.",
     color: "#ff7f0e",
-    image: "/images/transmision.png",
+    image: getAssetUrl("/images/transmision.png"),
     example: "Ejemplo: como pagar un peaje por usar una autopista nacional, pero para la electricidad.",
   },
   D: {
@@ -32,7 +33,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el valor por usar las redes locales que entregan la energía directamente a tu punto de conexión.",
     color: "#2ca02c",
-    image: "/images/distribucion.png",
+    image: getAssetUrl("/images/distribucion.png"),
     example: "Ejemplo: las redes del barrio que llevan la energía a tu sede.",
   },
   C: {
@@ -40,7 +41,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el valor por el servicio que hace posible que recibas tu energía a tiempo, con acompañamiento cercano y la buena energía de Celsia.",
     color: "#17becf",
-    image: "/images/comercializacion.png",
+    image: getAssetUrl("/images/comercializacion.png"),
     example: "Ejemplo: la atención y gestión comercial para que tu servicio funcione sin sorpresas.",
   },
   Perdidas: {
@@ -48,7 +49,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Son pequeñas cantidades de energía que se pierden en el camino hasta tu empresa y que la regulación permite incluir para mantener el equilibrio del sistema.",
     color: "#9467bd",
-    image: "/images/perdidas.svg",
+    image: getAssetUrl("/images/perdidas.svg"),
     example: "Ejemplo: calor en cables y transformadores que hace que parte de la energía no llegue.",
   },
   Otros: {

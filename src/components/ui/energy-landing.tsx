@@ -3,9 +3,6 @@ import Globe from "@/components/ui/globe";
 import { cn } from "@/lib/utils";
 import { getCelsiaLogoUrl, getInternalUrl, createImageWithFallback, debugUrls } from "@/lib/url-utils";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { 
   Zap, 
   Leaf, 
@@ -14,9 +11,6 @@ import {
   BarChart3, 
   Smartphone,
   Shield,
-  TrendingDown,
-  Users,
-  Clock,
   CheckCircle,
   ChevronDown
 } from "lucide-react";
