@@ -182,10 +182,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
         />
       </div>
 
-      {/* Desktop Theme Switcher - Top Right */}
-      <div className="hidden sm:flex fixed top-4 right-4 z-50">
-        <SimpleThemeToggle />
-      </div>
+      {/* Desktop Theme Switcher removed to keep default light theme */}
 
       {/* Enhanced Navigation */}
       <div className="hidden sm:flex fixed right-2 sm:right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40">
@@ -247,7 +244,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
         className="fixed z-10 pointer-events-none will-change-transform transition-all duration-[1400ms] ease-[cubic-bezier(0.23,1,0.32,1)]"
         style={{
           transform: globeTransform,
-          filter: `opacity(${activeSection === 3 ? 0.4 : 0.85})`,
+          filter: `opacity(${activeSection === 3 ? 0.4 : 0.9})`,
         }}
       >
         <div className="scale-75 sm:scale-90 lg:scale-100">
@@ -322,7 +319,19 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
             )}>
               <p className="mb-3 sm:mb-4 text-foreground">{section.description}</p>
               {index === 0 && (
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-foreground mt-4 sm:mt-6">
+                <p className="text-sm sm:text-base font-bold" style={{ color: '#f4721e' }}>
+                  Tu energía, tus decisiones, tu ahorro.
+                </p>
+              )}
+              {index === 0 && (
+                <div className="flex flex-col items-start gap-3 sm:gap-4 text-xs sm:text-sm text-foreground mt-4 sm:mt-6">
+                  <Link
+                    href={getInternalUrl('/dashboard')}
+                    className="group relative px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-auto bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                  >
+                    <span className="relative z-10">Inicia Tu Viaje</span>
+                    <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </Link>
                   <button 
                     onClick={() => {
                       const nextSection = sectionRefs.current[1];
@@ -339,7 +348,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
                       animationDelay: '0.5s'
                     }}
                   >
-                    <span className="font-semibold group-hover:text-primary transition-colors">Desplázate para Explorar</span> <br />
+                    <span className="font-semibold group-hover:text-primary transition-colors">Desliza para explorar</span> <br />
                     <ChevronDown className="h-3 w-3 mx-auto mt-2 group-hover:text-primary transition-colors" style={{ 
                       animation: 'bounce 3s ease-in-out infinite',
                       animationDelay: '0.7s'
@@ -387,10 +396,13 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
               )}>
                 {section.actions.map((action, actionIndex) => {
                   if (action.href) {
+                    const isExternal = action.href.startsWith('http');
                     return (
                       <Link
                         key={action.label}
                         href={action.href}
+                        target={isExternal ? "_blank" : undefined}
+                        rel={isExternal ? "noopener noreferrer" : undefined}
                         className={cn(
                           "group relative px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base",
                           "hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-auto",
@@ -437,42 +449,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
   );
 }
 
-// Simple Theme Toggle Component
-function SimpleThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    // Set dark as default
-    if (theme === 'system') {
-      setTheme('dark');
-    }
-  }, [theme, setTheme]);
-
-  if (!mounted) {
-    return null;
-  }
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleTheme}
-      className="h-10 w-10 hover:bg-accent"
-    >
-      {theme === 'dark' ? (
-        <Sun className="h-5 w-5" />
-      ) : (
-        <Moon className="h-5 w-5" />
-      )}
-    </Button>
-  );
-}
+// Theme toggle removed
 
 // EnergyHub specific ScrollGlobe component
 export default function EnergyHubLanding() {
@@ -484,10 +461,10 @@ export default function EnergyHubLanding() {
   const energySections = [
     {
       id: "hero",
-      badge: "EnergyHub by Celsia",
-      title: "EnergyHub",
+      badge: "Centro de Energía Celsia",
+      title: "Centro de Energía Celsia",
       subtitle: "Gestión Energética Inteligente",
-      description: "Sistema global de monitoreo energético inteligente con análisis en tiempo real y prácticas sostenibles. Proyecto piloto implementado en Valle del Cauca, Colombia, expandiendo hacia una red energética mundial interconectada.",
+      description: "El Centro de Energía Celsia es una plataforma digital de monitoreo y análisis que te permite conocer tu consumo, recibir alertas y tomar decisiones sostenibles para mejorar la eficiencia de tu empresa y reducir tus costos.",
       align: "left" as const
     },
     {
@@ -496,6 +473,39 @@ export default function EnergyHubLanding() {
       title: "Energía Conectada",
       description: "Desde el Valle del Cauca hacia el mundo, nuestro sistema de monitoreo energético conecta comunidades globales. Cada conexión representa eficiencia, cada interacción impulsa la sostenibilidad hacia un futuro energético global.",
       align: "center" as const,
+    },
+    {
+      id: "marketplace",
+      badge: "Market Place",
+      title: "Oferta para Pymes",
+      subtitle: "Soluciones Celsia",
+      description: "Explora soluciones de energía de Celsia diseñadas para pequeñas y medianas empresas.",
+      align: "left" as const,
+      features: [
+        {
+          title: "Paneles Solares",
+          description: "Instalación y financiamiento de soluciones solares a medida para tu empresa",
+          icon: <Zap className="h-5 w-5" />
+        },
+        {
+          title: "Proyectos Eléctricos",
+          description: "Diseño e implementación de proyectos eléctricos integrales y normativos",
+          icon: <CheckCircle className="h-5 w-5" />
+        },
+        {
+          title: "Estudios y Auditorías",
+          description: "Diagnósticos energéticos y auditorías para optimizar tu consumo",
+          icon: <BarChart3 className="h-5 w-5" />
+        },
+        {
+          title: "Energía de Respaldo",
+          description: "Soluciones de backup y continuidad operativa para eventos críticos",
+          icon: <Shield className="h-5 w-5" />
+        }
+      ],
+      actions: [
+        { label: "Conoce nuestras soluciones", variant: "secondary" as const, href: "https://www.celsia.com/en/celsiapymes/" }
+      ]
     },
     {
       id: "capabilities",
@@ -538,72 +548,11 @@ export default function EnergyHubLanding() {
       ]
     },
     {
-      id: "leadership",
-      badge: "Liderazgo",
-      title: "Visión",
-      subtitle: "Ejecutiva",
-      description: "Bajo el liderazgo visionario de nuestro CEO, EnergyHub representa el compromiso de Celsia con la innovación energética sostenible. Nuestra dirección ejecutiva guía la transformación hacia un futuro energético más eficiente y conectado globalmente.",
-      align: "center" as const,
-      features: [
-        { 
-          title: "Liderazgo Visionario", 
-          description: "Dirección estratégica enfocada en la innovación energética y sostenibilidad global",
-          icon: (
-            <div className="w-16 h-12 bg-white rounded-lg shadow-sm border p-1">
-              <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded flex items-end justify-center space-x-1">
-                <div className="w-1 h-2 bg-white/80 rounded-sm"></div>
-                <div className="w-1 h-4 bg-white/80 rounded-sm"></div>
-                <div className="w-1 h-3 bg-white/80 rounded-sm"></div>
-                <div className="w-1 h-5 bg-white/80 rounded-sm"></div>
-                <div className="w-1 h-2 bg-white/80 rounded-sm"></div>
-              </div>
-            </div>
-          )
-        },
-        { 
-          title: "Compromiso Sostenible", 
-          description: "Dedicación a la transformación energética hacia un futuro más verde y eficiente",
-          icon: (
-            <div className="w-16 h-12 bg-white rounded-lg shadow-sm border p-1">
-              <div className="w-full h-full relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 relative">
-                    <div className="w-8 h-8 border-2 border-green-200 rounded-full"></div>
-                    <div className="absolute top-0 left-0 w-8 h-8 border-2 border-green-500 rounded-full border-t-transparent border-r-transparent transform rotate-45"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-green-500 rounded-full"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        },
-        { 
-          title: "Innovación Tecnológica", 
-          description: "Inversión continua en tecnologías de monitoreo y gestión energética de vanguardia",
-          icon: (
-            <div className="w-16 h-12 bg-white rounded-lg shadow-sm border p-1">
-              <div className="w-full h-full relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-6 h-6 relative">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full absolute top-0 left-0"></div>
-                    <div className="w-2 h-2 bg-purple-500 rounded-full absolute top-0 right-0"></div>
-                    <div className="w-2 h-2 bg-purple-500 rounded-full absolute bottom-0 left-0"></div>
-                    <div className="w-2 h-2 bg-purple-500 rounded-full absolute bottom-0 right-0"></div>
-                    <div className="w-1 h-1 bg-purple-500 rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-ping"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        }
-      ]
-    },
-    {
       id: "future",
       badge: "Futuro",
       title: "Mañana",
       subtitle: "Sostenible",
-      description: "En este momento de transformación energética global, vemos no solo una región piloto, sino un lienzo de potencial sostenible infinito. Desde el Valle del Cauca hacia el mundo, cada optimización representa progreso, cada innovación construye puentes hacia nuestro futuro energético global colectivo.",
+      description: "En este momento de transformación energética global, vemos un lienzo de potencial sostenible infinito. Cada optimización representa progreso, cada innovación construye puentes hacia nuestro futuro energético global colectivo.",
       align: "center" as const,
       actions: [
         { label: "Iniciar tu Viaje", variant: "primary" as const, href: getInternalUrl("/dashboard") }
@@ -618,10 +567,7 @@ export default function EnergyHubLanding() {
         className="bg-gradient-to-br from-background via-muted/20 to-background"
       />
       
-      {/* Mobile Theme Switcher */}
-      <div className="fixed top-4 right-4 z-50 sm:hidden">
-        <SimpleThemeToggle />
-      </div>
+      {/* Theme switcher removed on mobile */}
 
       {/* Celsia Footer */}
       <div className="fixed bottom-4 right-4 z-50 bg-background/95 backdrop-blur-md border border-border/60 rounded-lg px-4 py-2 shadow-lg">

@@ -4,7 +4,6 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { ThemeProvider } from "next-themes";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import NotificationDropdown from "@/components/ui/notification-dropdown";
 import { useState } from "react";
@@ -51,22 +50,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>EnergyHub by Celsia - Gestión Energética Inteligente</title>
-        <meta name="description" content="Sistema global de monitoreo energético inteligente con insights en tiempo real y prácticas sostenibles. Piloto implementado en Valle del Cauca, Colombia." />
+        <title>Centro de Energía Celsia - Gestión Energética Inteligente</title>
+        <meta name="description" content="El Centro de Energía Celsia es una plataforma de monitoreo y análisis que permite conocer tu consumo, recibir alertas y tomar decisiones sostenibles para mejorar la eficiencia y reducir costos." />
         <meta name="keywords" content="energía, sostenibilidad, monitoreo energético, Celsia, Valle del Cauca, gestión energética" />
         <meta name="author" content="Celsia" />
-        <meta property="og:title" content="EnergyHub by Celsia - Gestión Energética Inteligente" />
-        <meta property="og:description" content="Sistema global de monitoreo energético inteligente con insights en tiempo real y prácticas sostenibles." />
+        <meta property="og:title" content="Centro de Energía Celsia - Gestión Energética Inteligente" />
+        <meta property="og:description" content="Plataforma digital de monitoreo y análisis para eficiencia energética y ahorro." />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="EnergyHub by Celsia" />
+        <meta name="twitter:title" content="Centro de Energía Celsia" />
         <meta name="twitter:description" content="Gestión Energética Inteligente - Monitoreo en tiempo real" />
       </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <div className="min-h-screen bg-background flex flex-col md:flex-row">
@@ -78,10 +77,9 @@ export default function RootLayout({
                   <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600">
                     <Zap className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-foreground font-semibold text-sm">EnergyHub</span>
+                  <span className="text-foreground font-semibold text-sm">Centro de Energía Celsia</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <ThemeSwitcher open={false} />
                   <Link href="/profile" className="p-2 rounded-full hover:bg-accent transition-colors">
                     <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-xs">
                       U
@@ -148,8 +146,8 @@ export default function RootLayout({
                       </div>
                       {sidebarOpen && (
                         <div className="flex flex-col">
-                          <h2 className="text-lg font-semibold text-foreground">EnergyHub</h2>
-                          <p className="text-sm text-muted-foreground">Gestión Energética</p>
+                          <h2 className="text-lg font-semibold text-foreground">Centro de Energía Celsia</h2>
+                          <p className="text-sm text-muted-foreground">Gestión Energética Inteligente</p>
                         </div>
                       )}
                     </Link>
@@ -173,13 +171,7 @@ export default function RootLayout({
                   <div className={cn(
                     "mt-auto flex flex-col gap-2 px-1 py-2",
                     sidebarOpen ? "items-start" : "items-center"
-                  )}>
-                    <div className={cn(
-                      "flex items-center",
-                      sidebarOpen ? "justify-start" : "justify-center"
                     )}>
-                      <ThemeSwitcher />
-                    </div>
                     <SidebarLink
                       link={{
                         label: "Usuario",
