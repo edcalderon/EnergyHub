@@ -1,6 +1,7 @@
 "use client";
 
 import EnergyConsumptionPanel from "@/components/dashboard/EnergyConsumptionPanel";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,9 @@ export default function DashboardPage() {
           {/* Main Content */}
           <div className="space-y-6">
             <EnergyConsumptionPanel />
+
+            {/* Activity Feed - Centro de Energía Celsia */}
+            <ActivityFeed />
 
             {/* Quick Access Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

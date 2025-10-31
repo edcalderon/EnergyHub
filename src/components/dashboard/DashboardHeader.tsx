@@ -2,7 +2,10 @@ import { Zap, Menu, User, Settings, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import Image from "next/image";
+import { getCelsiaLogoUrl } from "@/lib/url-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,12 +71,20 @@ export default function DashboardHeader() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
+              <Button variant="ghost" className="gap-2 hover:bg-accent/50">
+                <Avatar className="h-9 w-9 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                  <AvatarImage 
+                    src={getCelsiaLogoUrl()} 
+                    alt="Celsia"
+                    className="object-contain bg-white p-1.5"
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500">
+                    <User className="h-4 w-4 text-white" />
+                  </AvatarFallback>
+                </Avatar>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium">Mi Empresa S.A.S</p>
+                  <p className="text-xs text-muted-foreground">Celsia</p>
                 </div>
               </Button>
             </DropdownMenuTrigger>

@@ -6,12 +6,15 @@ import { usePathname } from "next/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import NotificationDropdown from "@/components/ui/notification-dropdown";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Zap, LayoutDashboard, Leaf, DollarSign, MapPin } from "lucide-react";
+import { Menu, X, Zap, LayoutDashboard, Leaf, DollarSign, MapPin, User } from "lucide-react";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { getCelsiaLogoUrl } from "@/lib/url-utils";
 import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
@@ -102,8 +105,17 @@ export default function RootLayout({
                 <div className="flex items-center gap-1">
                   <ThemeSwitcher />
                   <Link href="/profile" className="p-2 rounded-full hover:bg-orange-50 transition-colors group">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-medium text-xs shadow-sm group-hover:from-orange-600 group-hover:to-amber-600 transition-colors">
-                      U
+                    <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-sm border border-orange-200 overflow-hidden">
+                      <Image
+                        src={getCelsiaLogoUrl()}
+                        alt="Celsia"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
                     </div>
                   </Link>
                   <NotificationDropdown open={false} animate={false} />
@@ -206,12 +218,22 @@ export default function RootLayout({
                         label: "Usuario",
                         href: "/profile",
                         icon: (
-                          <div className={cn(
-                            "rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium flex-shrink-0",
-                            sidebarOpen ? "h-8 w-8 text-xs" : "h-10 w-10 text-sm"
+                          <Avatar className={cn(
+                            "flex-shrink-0 ring-2 ring-primary/20 hover:ring-primary/40 transition-all",
+                            sidebarOpen ? "h-8 w-8" : "h-10 w-10"
                           )}>
-                            U
-                          </div>
+                            <AvatarImage 
+                              src={getCelsiaLogoUrl()} 
+                              alt="Celsia"
+                              className="object-contain bg-white p-1 rounded-full"
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full">
+                              <User className={cn(
+                                "text-white",
+                                sidebarOpen ? "h-4 w-4" : "h-5 w-5"
+                              )} />
+                            </AvatarFallback>
+                          </Avatar>
                         ),
                       }}
                       open={sidebarOpen}

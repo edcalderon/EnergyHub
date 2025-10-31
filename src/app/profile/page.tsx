@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import Image from "next/image";
+import { getCelsiaLogoUrl } from "@/lib/url-utils";
 import {
   User,
   Mail,
@@ -55,6 +57,11 @@ export default function ProfilePage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-16 w-16">
+                      <AvatarImage 
+                        src={getCelsiaLogoUrl()} 
+                        alt="Celsia"
+                        className="object-contain bg-white p-2"
+                      />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-semibold">
                         U
                       </AvatarFallback>
