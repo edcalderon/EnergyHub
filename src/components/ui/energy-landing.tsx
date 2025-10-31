@@ -235,13 +235,22 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
 
       {/* Ultra-smooth Globe with responsive scaling */}
       <div
-        className="fixed z-10 pointer-events-none will-change-transform transition-all duration-[1400ms] ease-[cubic-bezier(0.23,1,0.32,1)]"
+        className="fixed z-10 will-change-transform transition-all duration-[1400ms] ease-[cubic-bezier(0.23,1,0.32,1)]"
         style={{
           transform: globeTransform,
           filter: `opacity(${activeSection === 3 ? 0.4 : 0.9})`,
         }}
       >
-        <div className="scale-75 sm:scale-90 lg:scale-100">
+        <div 
+          className="scale-75 sm:scale-90 lg:scale-100"
+          onClick={(e) => {
+            // Permite clicks en el globo pero no bloquea el scroll si no es en elementos interactivos
+            const target = e.target as HTMLElement;
+            if (target.closest('[data-globe-interactive]')) {
+              e.stopPropagation();
+            }
+          }}
+        >
           <Globe />
         </div>
       </div>
