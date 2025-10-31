@@ -67,8 +67,10 @@ export default function RootLayout({
               (function() {
                 try {
                   if (typeof window !== 'undefined') {
-                    const theme = localStorage.getItem('energyhub-theme') || 'light';
-                    document.documentElement.classList.remove('dark');
+                    const isLandingPage = window.location.pathname === '/';
+                    const defaultTheme = isLandingPage ? 'celsia' : 'light';
+                    const theme = localStorage.getItem('energyhub-theme') || defaultTheme;
+                    document.documentElement.classList.remove('dark', 'light', 'celsia');
                     document.documentElement.classList.add(theme);
                     if (theme === 'celsia') {
                       document.documentElement.setAttribute('data-theme', 'celsia');
@@ -85,7 +87,7 @@ export default function RootLayout({
         />
       </head>
       <body className={cn(inter.className, "min-h-screen bg-background")}>
-        <ThemeProvider defaultTheme="light">
+        <ThemeProvider defaultTheme={isLandingPage ? "celsia" : "light"}>
           <div className="min-h-screen bg-background flex flex-col md:flex-row">
             {/* Mobile Header - Hide on landing page */}
             {!isLandingPage && (
