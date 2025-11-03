@@ -1,14 +1,21 @@
 {
   "name": "energyhub",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Sistema global de monitoreo energético inteligente con análisis en tiempo real y prácticas sostenibles",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/pre-build.js && next build",
     "start": "next start",
     "export": "next build && next export",
-    "deploy": "npm run build"
+    "deploy": "npm run version:deploy && npm run build",
+    "version:patch": "node scripts/version.js patch",
+    "version:minor": "node scripts/version.js minor",
+    "version:major": "node scripts/version.js major",
+    "version:deploy": "node scripts/version.js patch",
+    "version:sync": "node scripts/pre-build.js",
+    "version:info": "node -e \"const pkg=require('./package.json');console.log('Version:', pkg.version)\""
   },
   "dependencies": {
     "@21st-extension/react": "^0.5.14",

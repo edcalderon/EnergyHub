@@ -1,10 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/contexts/user-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { getCelsiaLogoUrl } from "@/lib/url-utils";
 import {
@@ -18,10 +23,65 @@ import {
   Bell,
   Shield,
   LogOut,
-  Edit
+  Edit,
+  Save,
+  X,
+  Info
 } from "lucide-react";
+import { versionInfo } from "@/lib/version";
 
 export default function ProfilePage() {
+  const { user, updateUser, logout, isAuthenticated } = useUser();
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedNombre, setEditedNombre] = useState("");
+  const [editedContractId, setEditedContractId] = useState("");
+  const [editedUbicacion, setEditedUbicacion] = useState("");
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/");
+      return;
+    }
+    
+    if (user) {
+      setEditedNombre(user.nombre);
+      setEditedContractId(user.contractId);
+      setEditedUbicacion(user.ubicacion.address);
+    }
+  }, [user, isAuthenticated, router]);
+
+  const handleSave = () => {
+    if (user) {
+      updateUser({
+        nombre: editedNombre,
+        contractId: editedContractId,
+        ubicacion: {
+          ...user.ubicacion,
+          address: editedUbicacion,
+        },
+      });
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (user) {
+      setEditedNombre(user.nombre);
+      setEditedContractId(user.contractId);
+      setEditedUbicacion(user.ubicacion.address);
+    }
+    setIsEditing(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full">
@@ -48,10 +108,23 @@ export default function ProfilePage() {
                       <User className="h-5 w-5" />
                       Información Personal
                     </CardTitle>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar
-                    </Button>
+                    {!isEditing ? (
+                      <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={handleCancel}>
+                          <X className="h-4 w-4 mr-2" />
+                          Cancelar
+                        </Button>
+                        <Button size="sm" onClick={handleSave}>
+                          <Save className="h-4 w-4 mr-2" />
+                          Guardar
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -59,17 +132,29 @@ export default function ProfilePage() {
                     <Avatar className="h-16 w-16">
                       <AvatarImage 
                         src={getCelsiaLogoUrl()} 
-                        alt="Celsia"
+                        alt={user.nombre}
                         className="object-contain bg-white p-2"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-semibold">
-                        U
+                        {user.nombre.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="text-lg font-semibold text-foreground">Usuario Demo</h3>
-                      <p className="text-muted-foreground">Cliente Premium</p>
-                      <Badge variant="secondary" className="mt-1">Activo</Badge>
+                      {isEditing ? (
+                        <div className="space-y-2">
+                          <Input
+                            value={editedNombre}
+                            onChange={(e) => setEditedNombre(e.target.value)}
+                            className="max-w-xs"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <h3 className="text-lg font-semibold text-foreground">{user.nombre}</h3>
+                          <p className="text-muted-foreground">{user.contractId}</p>
+                          <Badge variant="secondary" className="mt-1">Activo</Badge>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -77,26 +162,34 @@ export default function ProfilePage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center gap-3">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Email</p>
-                        <p className="text-sm text-muted-foreground">usuario@energyhub.com</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Teléfono</p>
-                        <p className="text-sm text-muted-foreground">+57 300 123 4567</p>
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium text-foreground">ID del Contrato</Label>
+                        {isEditing ? (
+                          <Input
+                            value={editedContractId}
+                            onChange={(e) => setEditedContractId(e.target.value)}
+                            className="mt-1"
+                          />
+                        ) : (
+                          <p className="text-sm text-muted-foreground">{user.contractId}</p>
+                        )}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Dirección</p>
-                        <p className="text-sm text-muted-foreground">Bogotá, Colombia</p>
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium text-foreground">Ubicación</Label>
+                        {isEditing ? (
+                          <Input
+                            value={editedUbicacion}
+                            onChange={(e) => setEditedUbicacion(e.target.value)}
+                            className="mt-1"
+                          />
+                        ) : (
+                          <p className="text-sm text-muted-foreground">{user.ubicacion.address}</p>
+                        )}
                       </div>
                     </div>
 
@@ -104,7 +197,7 @@ export default function ProfilePage() {
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium text-foreground">Miembro desde</p>
-                        <p className="text-sm text-muted-foreground">Octubre 2024</p>
+                        <p className="text-sm text-muted-foreground">{new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
                       </div>
                     </div>
                   </div>
@@ -235,7 +328,19 @@ export default function ProfilePage() {
 
                   <Separator className="my-3" />
 
-                  <Button className="w-full justify-start text-destructive hover:text-destructive" variant="ghost">
+                  {/* Version Info */}
+                  <div className="px-3 py-2 bg-muted/50 rounded-lg flex items-center gap-2">
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      Versión {versionInfo.version}
+                    </span>
+                  </div>
+
+                  <Button 
+                    className="w-full justify-start text-destructive hover:text-destructive" 
+                    variant="ghost"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="h-4 w-4 mr-2" />
                     Cerrar Sesión
                   </Button>

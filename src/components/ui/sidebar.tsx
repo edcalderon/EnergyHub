@@ -95,7 +95,7 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-screen px-2 py-4 hidden md:flex md:flex-col w-[300px] flex-shrink-0 md:sticky md:top-0 md:overflow-y-auto",
+        "h-screen px-2 py-4 hidden md:flex md:flex-col w-[300px] flex-shrink-0 md:sticky md:top-0 md:overflow-y-auto relative",
         "bg-white dark:bg-background border-r border-[hsl(var(--border))]",
         "[data-theme='celsia']:bg-[hsl(var(--background))]",
         className
@@ -103,8 +103,18 @@ export const DesktopSidebar = ({
       animate={{
         width: animate ? (open ? "300px" : "80px") : "300px",
       }}
-      onMouseEnter={() => setOpen?.(true)}
-      onMouseLeave={() => setOpen?.(false)}
+      onMouseEnter={() => {
+        // Only auto-open if setOpen is defined (not locked)
+        if (setOpen) {
+          setOpen(true);
+        }
+      }}
+      onMouseLeave={() => {
+        // Only close if setOpen is defined (not locked)
+        if (setOpen) {
+          setOpen(false);
+        }
+      }}
       data-theme="celsia"
       {...props}
     >
@@ -235,10 +245,10 @@ export const SidebarLink = ({
     >
       <motion.div 
         className={cn(
-          "flex items-center justify-center transition-transform duration-300 group-hover/sidebar:scale-110",
+          "flex items-center justify-center transition-transform duration-300 group-hover/sidebar:scale-150",
           animate && !open ? "w-10 h-10" : "w-auto h-auto"
         )}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.5 }}
         transition={{ type: "spring", stiffness: 400, damping: 10 }}
       >
         {link.icon}

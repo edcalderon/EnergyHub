@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getAssetUrl } from "@/lib/url-utils";
 
 // Definición de tipos para los patrones
 interface NetworkNode {
@@ -159,7 +160,11 @@ const networkPatterns: NetworkPattern[] = [
   },
 ];
 
-const Globe: React.FC = () => {
+interface GlobeProps {
+  contrastMode?: 'light' | 'dark' | 'auto';
+}
+
+const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
   const [currentPatternIndex, setCurrentPatternIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const currentPattern = networkPatterns[currentPatternIndex];
@@ -320,20 +325,26 @@ const Globe: React.FC = () => {
         </div>
 
         <div
-          className="relative w-[250px] h-[250px] rounded-full overflow-visible"
+          className="relative w-[250px] h-[250px] rounded-full overflow-visible transition-all duration-500"
+          style={{
+            filter: contrastMode === 'light' 
+              ? 'brightness(1.8) contrast(1.2) invert(1)' 
+              : contrastMode === 'dark' 
+              ? 'brightness(0.3) contrast(1.5)' 
+              : 'none',
+          }}
         >
           {/* Planet background layer - non-interactive */}
           <div
-            className="absolute inset-0 rounded-full overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.2),-5px_0_8px_#c3f4ff_inset,15px_2px_25px_#000_inset,-24px_-2px_34px_#c3f4ff99_inset,250px_0_44px_#00000066_inset,150px_0_38px_#000000aa_inset] pointer-events-none"
+            className="absolute inset-0 rounded-full overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.2),-5px_0_8px_#c3f4ff_inset,15px_2px_25px_#000_inset,-24px_-2px_34px_#c3f4ff99_inset,250px_0_44px_#00000066_inset,150px_0_38px_#000000aa_inset] pointer-events-none transition-all duration-500"
             style={{
-              backgroundImage: "url('https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/globe.jpeg')",
+              backgroundImage: `url(${getAssetUrl("/images/earth-image.png")})`,
               backgroundSize: "cover",
               backgroundPosition: "left",
               animation: "earthRotate 30s linear infinite",
               zIndex: 1,
             }}
-          />
-          
+          />            
           {/* Dynamic Energy Network Nodes */}
           <div
             key={currentPattern.id}
@@ -353,8 +364,8 @@ const Globe: React.FC = () => {
                 style={{
                   top: node.top,
                   left: node.left,
-                  width: '24px',
-                  height: '24px',
+                  width: '16px',
+                  height: '16px',
                   transform: 'translate(-50%, -50%)',
                   zIndex: 30,
                   animation: `patternFadeIn ${0.5 + index * 0.1}s ease-out`,
@@ -366,23 +377,23 @@ const Globe: React.FC = () => {
                   style={{
                     top: '50%',
                     left: '50%',
-                    width: '20px',
-                    height: '20px',
+                    width: '14px',
+                    height: '14px',
                     transform: 'translate(-50%, -50%)',
                   }}
                 />
                 {/* Node core */}
                 <div
-                  className="absolute w-2.5 h-2.5 rounded-full node-core"
+                  className="absolute w-1.5 h-1.5 rounded-full node-core"
                   style={{
                     top: '50%',
                     left: '50%',
                     background: 'radial-gradient(circle, #f4721e 0%, #e55a00 50%, transparent 100%)',
                     animation: `energyPulse ${2 + node.pulseDelay}s infinite`,
                     animationDelay: `${node.pulseDelay}s`,
-                    boxShadow: '0 0 10px #f4721e, 0 0 20px #f4721e, 0 0 30px #f4721e, 0 0 40px rgba(244, 114, 30, 0.4)',
+                    boxShadow: '0 0 6px #f4721e, 0 0 12px #f4721e, 0 0 18px #f4721e, 0 0 24px rgba(244, 114, 30, 0.4)',
                     transform: 'translate(-50%, -50%)',
-                    filter: 'drop-shadow(0 0 4px rgba(244, 114, 30, 0.8))',
+                    filter: 'drop-shadow(0 0 2px rgba(244, 114, 30, 0.8))',
                     pointerEvents: 'none',
                   }}
                 >
@@ -432,13 +443,13 @@ const Globe: React.FC = () => {
                 <path
                   d={path.d}
                   stroke={`url(#energyGradient-${currentPattern.id})`}
-                  strokeWidth="1.5"
+                  strokeWidth="1"
                   fill="none"
-                  strokeDasharray="6,4"
+                  strokeDasharray="4,3"
                   style={{
                     animation: `energyFlow ${path.flowDuration}s linear infinite, networkEvolve ${3 + path.delay}s ease-in-out infinite`,
                     animationDelay: `${path.delay}s`,
-                    filter: `drop-shadow(0 0 4px #f4721e) drop-shadow(0 0 8px rgba(244, 114, 30, 0.5))`,
+                    filter: `drop-shadow(0 0 2px #f4721e) drop-shadow(0 0 4px rgba(244, 114, 30, 0.5))`,
                     opacity: 0.85,
                     pointerEvents: 'none',
                   }}

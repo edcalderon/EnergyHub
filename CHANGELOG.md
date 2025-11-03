@@ -1,6 +1,54 @@
 # Changelog
 
+## [1.0.3] - 2025-11-03
+
+### Added
+- Comprehensive version management system with automated versioning scripts
+- Version display in user profile page (Acciones Rápidas section)
+- Pre-build script to automatically sync version information from package.json
+- Version tracking with git commit hash and branch information
+- Lock/unlock functionality for sidebar (works in both collapsed and expanded states)
+- Three-state lock button: "Bloquear barra", "Desbloquear barra", "Comprimir y bloquear"
+- Guest user option in "Inicia Tu Viaje" modal with demo user data
+- Proper LICENSE file (MIT License with Celsia branding disclaimers)
+- Comprehensive disclaimer in README about demonstrative/educational nature
+
+### Changed
+- Sidebar icons replaced with custom images from `/Iconos/sidebar/` directory
+- Increased sidebar icon sizes (h-7 w-7 when open, h-9 w-9 when closed)
+- Lock button repositioned below theme switcher in sidebar
+- Improved sidebar lock functionality to work in compressed state
+- Version system always syncs APP_VERSION with package.json version
+- Removed pulse animation from sidebar icons, enhanced zoom effect (1.5x scale)
+- Sidebar icons now have orange-themed hover effects
+
+### Documentation
+- Added LICENSE file with MIT License and Celsia trademark disclaimers
+- Updated README with comprehensive disclaimer section
+- Added version management documentation in `scripts/README.md`
+- Created exhaustive versioning script system with automated changelog
+
+### Technical
+- Git commit: 50414e5
+- Build date: 2025-11-03
+
+
 All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.2] - 2024-12-19
+
+### Added
+- Version management system with automated versioning scripts
+- Version display in user profile page
+- Pre-build script to update version information automatically
+- Comprehensive version tracking with git commit and branch info
+
+### Changed
+- Updated versioning system to use semantic versioning
+- Improved build process with automatic version updates
 
 ## [0.2.1] - 2024-03-17
 

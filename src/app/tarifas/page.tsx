@@ -38,7 +38,7 @@ export default function TarifasPage() {
             </Button>
           )}
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Información Tarifaria
+            Mi tarifa
           </h1>
           <p className="text-muted-foreground">
             Desglose detallado de costos energéticos y planes alternativos

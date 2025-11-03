@@ -14,6 +14,9 @@ import {
   CheckCircle,
   ChevronDown
 } from "lucide-react";
+import { StartJourneyForm } from "@/components/ui/start-journey-form";
+import { useUser } from "@/contexts/user-context";
+import { useRouter } from "next/navigation";
 
 // Reusable ScrollGlobe component following shadcn/ui patterns
 interface ScrollGlobeProps {
@@ -35,6 +38,7 @@ interface ScrollGlobeProps {
     }[];
   };
   className?: string;
+  onStartJourneyClick?: () => void;
 }
 
 const defaultGlobeConfig = {
@@ -50,14 +54,18 @@ const defaultGlobeConfig = {
 // Parse percentage string to number
 const parsePercent = (str: string): number => parseFloat(str.replace('%', ''));
 
-function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: ScrollGlobeProps) {
+function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, onStartJourneyClick }: ScrollGlobeProps) {
   const [activeSection, setActiveSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [globeTransform, setGlobeTransform] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const [globeContrastMode, setGlobeContrastMode] = useState<'light' | 'dark' | 'auto'>('auto');
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const globeContainerRef = useRef<HTMLDivElement | null>(null);
   const animationFrameId = useRef<number>();
+  const overlapCheckFrameId = useRef<number>();
   
   // Pre-calculate positions for performance
   const calculatedPositions = useMemo(() => {
@@ -67,6 +75,32 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
       scale: pos.scale
     }));
   }, [globeConfig.positions]);
+
+  // Check if hero text overlaps with globe (separate from scroll tracking)
+  const checkTextGlobeOverlap = useCallback(() => {
+    if (!heroTextRef.current || !globeContainerRef.current || activeSection !== 0) {
+      if (activeSection !== 0) {
+        setGlobeContrastMode('auto');
+      }
+      return;
+    }
+
+    const textRect = heroTextRef.current.getBoundingClientRect();
+    const globeRect = globeContainerRef.current.getBoundingClientRect();
+
+    const overlap = !(
+      textRect.right < globeRect.left ||
+      textRect.left > globeRect.right ||
+      textRect.bottom < globeRect.top ||
+      textRect.top > globeRect.bottom
+    );
+
+    if (overlap) {
+      setGlobeContrastMode('light');
+    } else {
+      setGlobeContrastMode('auto');
+    }
+  }, [activeSection]);
 
   // Improved scroll tracking
   const updateScrollPosition = useCallback(() => {
@@ -137,6 +171,30 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
       }
     };
   }, [updateScrollPosition, isMounted]);
+
+  // Separate effect for overlap checking (doesn't interfere with scroll)
+  useEffect(() => {
+    if (!isMounted) return;
+
+    let lastCheck = 0;
+    const throttleMs = 150; // Check every 150ms
+    
+    const checkOverlap = (timestamp: number) => {
+      if (timestamp - lastCheck >= throttleMs) {
+        checkTextGlobeOverlap();
+        lastCheck = timestamp;
+      }
+      overlapCheckFrameId.current = requestAnimationFrame(checkOverlap);
+    };
+    
+    overlapCheckFrameId.current = requestAnimationFrame(checkOverlap);
+    
+    return () => {
+      if (overlapCheckFrameId.current) {
+        cancelAnimationFrame(overlapCheckFrameId.current);
+      }
+    };
+  }, [isMounted, checkTextGlobeOverlap]);
 
   // Initial globe position
   useEffect(() => {
@@ -235,6 +293,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
 
       {/* Ultra-smooth Globe with responsive scaling */}
       <div
+        ref={globeContainerRef}
         className="fixed z-10 will-change-transform transition-all duration-[1400ms] ease-[cubic-bezier(0.23,1,0.32,1)]"
         style={{
           transform: globeTransform,
@@ -251,7 +310,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
             }
           }}
         >
-          <Globe />
+          <Globe contrastMode={globeContrastMode} />
         </div>
       </div>
 
@@ -320,7 +379,12 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
               "text-foreground leading-relaxed mb-8 sm:mb-10 text-base sm:text-lg lg:text-xl font-semibold",
               section.align === 'center' ? "max-w-full mx-auto text-center" : "max-w-full"
             )}>
-              <p className="mb-3 sm:mb-4 text-foreground">{section.description}</p>
+              <p 
+                ref={index === 0 ? heroTextRef : null}
+                className="mb-3 sm:mb-4 text-foreground"
+              >
+                {section.description}
+              </p>
               {index === 0 && (
                 <p className="text-sm sm:text-base font-bold" style={{ color: '#f4721e' }}>
                   Tu energía, tus decisiones, tu ahorro.
@@ -328,13 +392,13 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
               )}
               {index === 0 && (
                 <div className="flex flex-col items-start gap-3 sm:gap-4 text-xs sm:text-sm text-foreground mt-4 sm:mt-6">
-                  <Link
-                    href={getInternalUrl('/dashboard')}
+                  <button
+                    onClick={onStartJourneyClick}
                     className="group relative px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-auto bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30"
                   >
                     <span className="relative z-10">Inicia Tu Viaje</span>
                     <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </Link>
+                  </button>
                   <button 
                     onClick={() => {
                       const nextSection = sectionRefs.current[1];
@@ -456,10 +520,34 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className }: 
 
 // EnergyHub specific ScrollGlobe component
 export default function EnergyHubLanding() {
+  const [isStartJourneyOpen, setIsStartJourneyOpen] = useState(false);
+  const { setUser } = useUser();
+  const router = useRouter();
+  
   // Debug URLs in development
   useEffect(() => {
     debugUrls('EnergyHub Landing');
   }, []);
+
+  const handleStartJourneySubmit = (data: {
+    nombre: string;
+    contractId: string;
+    ubicacion: {
+      address: string;
+      lat: number;
+      lng: number;
+    };
+  }) => {
+    // Guardar datos del usuario en el contexto
+    setUser({
+      nombre: data.nombre,
+      contractId: data.contractId,
+      ubicacion: data.ubicacion,
+    });
+    
+    // Redirigir al dashboard
+    router.push(getInternalUrl('/dashboard'));
+  };
 
   const energySections = [
     {
@@ -467,7 +555,7 @@ export default function EnergyHubLanding() {
       badge: "Centro de Energía Celsia",
       title: "Centro de Energía Celsia",
       subtitle: "Gestión Energética Inteligente",
-      description: "El Centro de Energía Celsia es una plataforma digital de monitoreo y análisis que te permite conocer tu consumo, recibir alertas y tomar decisiones sostenibles para mejorar la eficiencia de tu empresa y reducir tus costos.",
+      description: "El Centro de Energía Celsia es una plataforma digital de monitoreo y análisis que te permite detectar patrones de consumo, recibir alertas y tomar decisiones sostenibles para mejorar la eficiencia de tu empresa y reducir tus costos.",
       align: "left" as const
     },
     {
@@ -558,7 +646,11 @@ export default function EnergyHubLanding() {
       description: "En este momento de transformación energética global, vemos un lienzo de potencial sostenible infinito. Cada optimización representa progreso, cada innovación construye puentes hacia nuestro futuro energético global colectivo.",
       align: "center" as const,
       actions: [
-        { label: "Iniciar tu Viaje", variant: "primary" as const, href: getInternalUrl("/dashboard") }
+        { 
+          label: "Iniciar tu Viaje", 
+          variant: "primary" as const, 
+          onClick: () => setIsStartJourneyOpen(true)
+        }
       ]
     }
   ];
@@ -568,6 +660,7 @@ export default function EnergyHubLanding() {
       <ScrollGlobe 
         sections={energySections}
         className="bg-gradient-to-br from-background via-muted/20 to-background"
+        onStartJourneyClick={() => setIsStartJourneyOpen(true)}
       />
       
       {/* Theme switcher removed on mobile */}
@@ -602,6 +695,13 @@ export default function EnergyHubLanding() {
           <span className="text-xs font-semibold text-foreground">By Celsia</span>
         </div>
       </div>
+
+      {/* Start Journey Form Modal */}
+      <StartJourneyForm
+        open={isStartJourneyOpen}
+        onOpenChange={setIsStartJourneyOpen}
+        onSubmit={handleStartJourneySubmit}
+      />
     </div>
   );
 }

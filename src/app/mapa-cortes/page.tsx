@@ -239,7 +239,7 @@ export default function MapaCortesPage() {
         <div className="w-full max-w-7xl mx-auto mb-4 sm:mb-6 md:mb-8 px-0">
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Mapa de Cortes
+              Estado de Mi servicio
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
               Visualización en tiempo real de interrupciones programadas y no programadas

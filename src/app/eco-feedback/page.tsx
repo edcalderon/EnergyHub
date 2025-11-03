@@ -42,7 +42,7 @@ export default function EcoFeedbackPage() {
         )}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Sistema de Eco-Feedback
+            Mi informe de energía
           </h1>
           <p className="text-muted-foreground">
             Impacto ambiental de tu consumo energético y recomendaciones sostenibles

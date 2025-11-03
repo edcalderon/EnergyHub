@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/contexts/user-context";
 import EnergyConsumptionPanel from "@/components/dashboard/EnergyConsumptionPanel";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import Link from "next/link";
@@ -8,14 +11,31 @@ import { Button } from "@/components/ui/button";
 import { Leaf, DollarSign, MapPin, ArrowRight } from "lucide-react";
 
 export default function DashboardPage() {
+  const { isAuthenticated, user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
   return (
     <div className="min-h-screen bg-background w-full">
       <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
         {/* Hero Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Dashboard de Gestión Energética
-          </h1>
+          <div className="mb-4">
+            <h2 className="text-2xl font-semibold text-foreground mb-1">
+              ¡{user?.nombre || "Usuario"} te damos la bienvenida!
+            </h2>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Panel de energía
+            </h1>
+          </div>
           <p className="text-muted-foreground">
             Monitorea tu consumo, recibe alertas inteligentes y optimiza tu gasto energético en tiempo real
           </p>
@@ -38,7 +58,7 @@ export default function DashboardPage() {
                     <div className="p-2 rounded-lg bg-green-500/10">
                       <DollarSign className="h-5 w-5 text-green-500" />
                     </div>
-                    <h3 className="font-semibold text-foreground">Tarifas</h3>
+                    <h3 className="font-semibold text-foreground">Mi tarifa</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Consulta desglose de costos y planes alternativos
@@ -55,7 +75,7 @@ export default function DashboardPage() {
                     <div className="p-2 rounded-lg bg-green-500/10">
                       <Leaf className="h-5 w-5 text-green-500" />
                     </div>
-                    <h3 className="font-semibold text-foreground">Eco-Feedback</h3>
+                    <h3 className="font-semibold text-foreground">Mi informe de energía</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Impacto ambiental y prácticas sostenibles
@@ -72,7 +92,7 @@ export default function DashboardPage() {
                     <div className="p-2 rounded-lg bg-red-500/10">
                       <MapPin className="h-5 w-5 text-red-500" />
                     </div>
-                    <h3 className="font-semibold text-foreground">Mapa de Cortes</h3>
+                    <h3 className="font-semibold text-foreground">Estado de Mi servicio</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Visualiza áreas afectadas en tiempo real
