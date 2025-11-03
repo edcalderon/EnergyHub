@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getAssetUrl } from "@/lib/url-utils";
+import { useTheme } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
 
 // Definición de tipos para los patrones
 interface NetworkNode {
@@ -165,9 +167,17 @@ interface GlobeProps {
 }
 
 const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
+  const { theme } = useTheme();
   const [currentPatternIndex, setCurrentPatternIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const currentPattern = networkPatterns[currentPatternIndex];
+  const isCelsiaMode = theme === 'celsia';
+  const isDarkMode = contrastMode === 'dark';
+  
+  // Get the appropriate globe image based on theme
+  const globeImage = isCelsiaMode 
+    ? getAssetUrl("/images/earth-celsia.png")
+    : getAssetUrl("/images/globe-light.jpeg");
 
   const nextPattern = () => {
     setCurrentPatternIndex((prev) => (prev + 1) % networkPatterns.length);
@@ -231,9 +241,9 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
   // Preload earth image for better performance - start loading immediately
   useEffect(() => {
     const img = new Image();
-    img.src = getAssetUrl("/images/earth-image.png");
+    img.src = globeImage;
     // Preload the image by creating an Image object
-  }, []);
+  }, [globeImage]);
 
   return (
     <>
@@ -242,6 +252,10 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
           @keyframes earthRotate {
             0% { background-position: 0 0; }
             100% { background-position: 400px 0; }
+          }
+          @keyframes earthRotateReverse {
+            0% { background-position: 400px 0; }
+            100% { background-position: 0 0; }
           }
           @keyframes twinkling { 0%,100% { opacity:0.1; } 50% { opacity:1; } }
           @keyframes twinkling-slow { 0%,100% { opacity:0.1; } 50% { opacity:1; } }
@@ -343,29 +357,35 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
         >
           {/* Planet background layer - non-interactive */}
           <div
-            className="absolute inset-0 rounded-full overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.2),-5px_0_8px_#c3f4ff_inset,15px_2px_25px_#000_inset,-24px_-2px_34px_#c3f4ff99_inset,250px_0_44px_#00000066_inset,150px_0_38px_#000000aa_inset] pointer-events-none transition-all duration-500"
+            className={cn(
+              "absolute inset-0 rounded-full overflow-hidden pointer-events-none transition-all duration-500",
+              // Original shadow effects for all modes
+              "shadow-[0_0_20px_rgba(255,255,255,0.2),-5px_0_8px_#c3f4ff_inset,15px_2px_25px_#000_inset,-24px_-2px_34px_#c3f4ff99_inset,250px_0_44px_#00000066_inset,150px_0_38px_#000000aa_inset]"
+            )}
             style={{
-              backgroundImage: `url(${getAssetUrl("/images/earth-image.png")})`,
+              backgroundImage: `url(${globeImage})`,
               backgroundSize: "cover",
               backgroundPosition: "left",
+              // Original rotation: normal (left to right) for all modes
               animation: "earthRotate 30s linear infinite",
               zIndex: 1,
               willChange: "background-position",
               backfaceVisibility: "hidden",
             }}
           />            
-          {/* Dynamic Energy Network Nodes */}
-          <div
-            key={currentPattern.id}
-            className="absolute inset-0"
-            style={{
-              animation: isTransitioning 
-                ? "patternEvolve 1s ease-in-out" 
-                : "patternFadeIn 0.8s ease-out, networkEvolve 4s ease-in-out infinite",
-              zIndex: 20,
-              transition: 'opacity 0.8s ease-in-out',
-            }}
-          >
+          {/* Dynamic Energy Network Nodes - Only show in Celsia mode */}
+          {isCelsiaMode && (
+            <div
+              key={currentPattern.id}
+              className="absolute inset-0"
+              style={{
+                animation: isTransitioning 
+                  ? "patternEvolve 1s ease-in-out" 
+                  : "patternFadeIn 0.8s ease-out, networkEvolve 4s ease-in-out infinite",
+                zIndex: 20,
+                transition: 'opacity 0.8s ease-in-out',
+              }}
+            >
             {currentPattern.nodes.map((node, index) => (
               <div
                 key={`node-${index}`}
@@ -418,9 +438,11 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
 
-          {/* Dynamic Energy Network Lines - Improved with better curves */}
+          {/* Dynamic Energy Network Lines - Improved with better curves - Only show in Celsia mode */}
+          {isCelsiaMode && (
           <svg 
             className="absolute inset-0 w-full h-full" 
             style={{ 
@@ -466,8 +488,11 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
               </g>
             ))}
           </svg>
+          )}
 
-          {/* Enhanced Orbital Energy Rings - Multiple layers for depth */}
+          {/* Enhanced Orbital Energy Rings - Multiple layers for depth - Only show in Celsia mode */}
+          {isCelsiaMode && (
+          <>
           <div 
             className="absolute inset-[-20px] rounded-full border border-orange-500/30 pointer-events-none"
             style={{
@@ -493,7 +518,7 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
             }}
           />
 
-          {/* Stars */}
+          {/* Stars - Only show in Celsia mode */}
           <div
             className="absolute left-[-20px] w-1 h-1 bg-white rounded-full pointer-events-none"
             style={{ animation: "twinkling 3s infinite", zIndex: 1 }}
@@ -522,6 +547,8 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
             className="absolute left-[290px] top-[60px] w-1 h-1 bg-white rounded-full pointer-events-none"
             style={{ animation: "twinkling-slow 2s infinite", zIndex: 1 }}
           />
+          </>
+          )}
         </div>
       </div>
     </>

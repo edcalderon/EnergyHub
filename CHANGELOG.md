@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5] - 2025-11-03
+### PATCH
+- Auto-generated release entry
+- Git commit: 42969b3
+- Build date: 2025-11-03
+
+
 ## [1.0.4] - 2025-11-03
 
 ### Added

@@ -99,7 +99,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <ThemeProvider defaultTheme={isLandingPage ? "celsia" : "light"}>
+    <ThemeProvider defaultTheme="light">
       <UserProvider>
         <div className="min-h-screen bg-background flex flex-col md:flex-row">
           {/* Mobile Header - Hide on landing page */}

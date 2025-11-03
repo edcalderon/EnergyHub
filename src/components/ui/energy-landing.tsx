@@ -17,6 +17,7 @@ import {
 import { StartJourneyForm } from "@/components/ui/start-journey-form";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "next/navigation";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 // Reusable ScrollGlobe component following shadcn/ui patterns
 interface ScrollGlobeProps {
@@ -234,7 +235,10 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
         />
       </div>
 
-      {/* Desktop Theme Switcher removed to keep default light theme */}
+      {/* Desktop Theme Switcher */}
+      <div className="hidden sm:flex fixed top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
 
       {/* Enhanced Navigation */}
       <div className="hidden sm:flex fixed right-2 sm:right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40">
@@ -663,7 +667,10 @@ export default function EnergyHubLanding() {
         onStartJourneyClick={() => setIsStartJourneyOpen(true)}
       />
       
-      {/* Theme switcher removed on mobile */}
+      {/* Mobile Theme Switcher */}
+      <div className="sm:hidden fixed top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
 
       {/* Celsia Footer */}
       <div className="fixed bottom-4 right-4 z-50 bg-background/95 backdrop-blur-md border border-border/60 rounded-lg px-4 py-2 shadow-lg">
