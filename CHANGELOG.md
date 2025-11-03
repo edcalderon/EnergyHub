@@ -1,9 +1,29 @@
 # Changelog
 
 ## [1.0.5] - 2025-11-03
-### PATCH
-- Auto-generated release entry
-- Git commit: 42969b3
+
+### Added
+- Theme switcher restored to landing page (desktop and mobile)
+- Dynamic globe image switching based on theme:
+  - Light mode: uses `globe-light.jpeg`
+  - Celsia mode: uses `earth-celsia.png`
+- Conditional globe effects based on theme:
+  - Light mode: no network effects or aureola effects
+  - Celsia mode: network effects and aureola effects visible
+
+### Changed
+- Light mode now defaults on all pages (including landing page)
+- Globe component now theme-aware with dynamic image and effects
+- Restored contrast effect for globe when behind text (light mode)
+- Improved globe styling with consistent shadow/blur effects across all modes
+- Globe rotation restored for all modes
+
+### Fixed
+- Removed contrast filter on light mode (was causing visual issues)
+- Fixed theme initialization to properly respect defaultTheme parameter
+
+### Technical
+- Git commit: fadf33c
 - Build date: 2025-11-03
 
 
