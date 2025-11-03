@@ -23,6 +23,8 @@ export default function RootLayout({
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Centro de Energía Celsia" />
         <meta name="twitter:description" content="Gestión Energética Inteligente - Monitoreo en tiempo real" />
+        {/* Preload critical earth image for globe component - optimize loading */}
+        <link rel="preload" as="image" href="/images/earth-image.png" fetchPriority="high" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -31,7 +33,11 @@ export default function RootLayout({
                   if (typeof window !== 'undefined') {
                     const isLandingPage = window.location.pathname === '/';
                     const defaultTheme = isLandingPage ? 'celsia' : 'light';
-                    const theme = localStorage.getItem('energyhub-theme') || defaultTheme;
+                    // For landing page, always use celsia unless explicitly overridden
+                    const storedTheme = localStorage.getItem('energyhub-theme');
+                    const theme = isLandingPage 
+                      ? (storedTheme === 'light' ? 'light' : 'celsia')
+                      : (storedTheme || defaultTheme);
                     document.documentElement.classList.remove('dark', 'light', 'celsia');
                     document.documentElement.classList.add(theme);
                     if (theme === 'celsia') {

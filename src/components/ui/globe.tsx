@@ -228,6 +228,13 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
     };
   }, []);
 
+  // Preload earth image for better performance - start loading immediately
+  useEffect(() => {
+    const img = new Image();
+    img.src = getAssetUrl("/images/earth-image.png");
+    // Preload the image by creating an Image object
+  }, []);
+
   return (
     <>
       <style>
@@ -343,6 +350,8 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
               backgroundPosition: "left",
               animation: "earthRotate 30s linear infinite",
               zIndex: 1,
+              willChange: "background-position",
+              backfaceVisibility: "hidden",
             }}
           />            
           {/* Dynamic Energy Network Nodes */}

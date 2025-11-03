@@ -30,15 +30,27 @@ export function ThemeProvider({
   storageKey = "energyhub-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  // Use defaultTheme if no stored theme exists, prioritizing defaultTheme for landing page
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem(storageKey) as Theme;
+      // If no stored theme, use defaultTheme (which should be "celsia" for landing page)
+      return storedTheme || defaultTheme;
+    }
+    return defaultTheme;
+  });
 
   // Initialize theme from localStorage on client side only
   useEffect(() => {
     const storedTheme = localStorage.getItem(storageKey) as Theme;
+    // Only use stored theme if it exists, otherwise respect defaultTheme
     if (storedTheme) {
       setTheme(storedTheme);
+    } else if (defaultTheme) {
+      // If no stored theme and defaultTheme is provided, use it (important for landing page)
+      setTheme(defaultTheme);
     }
-  }, [storageKey]);
+  }, [storageKey, defaultTheme]);
 
   // Apply theme changes
   useEffect(() => {

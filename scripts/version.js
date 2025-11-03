@@ -5,10 +5,13 @@
  * 
  * This script manages version numbers and changelog updates.
  * Usage:
- *   npm run version:patch   - Increment patch version (1.0.0 -> 1.0.1)
- *   npm run version:minor   - Increment minor version (1.0.0 -> 1.1.0)
- *   npm run version:major   - Increment major version (1.0.0 -> 2.0.0)
- *   npm run version:deploy  - Auto-increment patch version and update changelog
+ *   npm run version:patch   - Increment patch version (1.0.0 -> 1.0.1) and push
+ *   npm run version:minor   - Increment minor version (1.0.0 -> 1.1.0) and push
+ *   npm run version:major   - Increment major version (1.0.0 -> 2.0.0) and push
+ *   npm run version:deploy  - Auto-increment patch version, update changelog, and push
+ * 
+ * Options:
+ *   --no-push   - Skip automatic git push (for testing)
  */
 
 const fs = require('fs');
@@ -164,9 +167,83 @@ function promptForChanges() {
   return [];
 }
 
+function getGitStatus() {
+  try {
+    const status = execSync('git status --porcelain', { encoding: 'utf8' });
+    return status.trim();
+  } catch (error) {
+    return '';
+  }
+}
+
+function getCurrentBranch() {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+  } catch (error) {
+    return 'main';
+  }
+}
+
+function commitAndTag(newVersion, type) {
+  try {
+    const branch = getCurrentBranch();
+    const gitStatus = getGitStatus();
+    
+    if (!gitStatus) {
+      log('⚠️  No changes to commit', 'yellow');
+      return false;
+    }
+    
+    log('\n📝 Staging changes...', 'blue');
+    execSync('git add -A', { stdio: 'inherit' });
+    
+    log('💾 Creating commit...', 'blue');
+    const commitMessage = `chore: bump version to ${newVersion}`;
+    execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
+    log(`✓ Committed changes`, 'green');
+    
+    log('🏷️  Creating tag...', 'blue');
+    const tagMessage = `Release version ${newVersion}`;
+    execSync(`git tag -a v${newVersion} -m "${tagMessage}"`, { stdio: 'inherit' });
+    log(`✓ Created tag v${newVersion}`, 'green');
+    
+    return true;
+  } catch (error) {
+    log(`⚠️  Git operations failed: ${error.message}`, 'yellow');
+    return false;
+  }
+}
+
+function pushToRemote(newVersion, shouldPush) {
+  if (!shouldPush) {
+    log('\n⏭️  Skipping push (--no-push flag or CI detected)', 'yellow');
+    return false;
+  }
+  
+  try {
+    const branch = getCurrentBranch();
+    log(`\n🚀 Pushing to origin/${branch}...`, 'blue');
+    
+    execSync(`git push origin ${branch}`, { stdio: 'inherit' });
+    log(`✓ Pushed commits to origin/${branch}`, 'green');
+    
+    log(`🏷️  Pushing tags...`, 'blue');
+    execSync(`git push origin v${newVersion}`, { stdio: 'inherit' });
+    log(`✓ Pushed tag v${newVersion}`, 'green');
+    
+    return true;
+  } catch (error) {
+    log(`⚠️  Push failed: ${error.message}`, 'yellow');
+    log(`   You may need to push manually: git push origin ${getCurrentBranch()} --tags`, 'yellow');
+    return false;
+  }
+}
+
 function main() {
   const args = process.argv.slice(2);
-  const type = args[0] || 'patch';
+  const type = args.find(arg => ['major', 'minor', 'patch'].includes(arg)) || 'patch';
+  const noPush = args.includes('--no-push');
+  const shouldPush = !noPush && !process.env.CI; // Auto-push unless --no-push flag or CI environment
   
   if (!['major', 'minor', 'patch'].includes(type)) {
     log('Error: Invalid version type. Use: major, minor, or patch', 'red');
@@ -191,11 +268,28 @@ function main() {
     updateChangelog(newVersion, type);
     
     log('\n✅ Version update complete!', 'green');
-    log(`\nNext steps:`, 'bright');
-    log(`1. Review and update CHANGELOG.md with actual changes`, 'yellow');
-    log(`2. Commit changes: git add -A && git commit -m "chore: bump version to ${newVersion}"`, 'yellow');
-    log(`3. Create tag: git tag -a v${newVersion} -m "Release version ${newVersion}"`, 'yellow');
-    log(`4. Push: git push origin main --tags`, 'yellow');
+    
+    // Commit and tag
+    const committed = commitAndTag(newVersion, type);
+    
+    if (committed) {
+      // Push if enabled
+      if (shouldPush) {
+        pushToRemote(newVersion, true);
+        log('\n🎉 Release complete!', 'green');
+        log(`   Version ${newVersion} has been pushed to origin`, 'green');
+      } else {
+        log(`\n📋 Next steps:`, 'bright');
+        log(`1. Review and update CHANGELOG.md with actual changes`, 'yellow');
+        log(`2. Push manually: git push origin ${getCurrentBranch()} --tags`, 'yellow');
+      }
+    } else {
+      log(`\n📋 Next steps:`, 'bright');
+      log(`1. Review and update CHANGELOG.md with actual changes`, 'yellow');
+      log(`2. Commit changes: git add -A && git commit -m "chore: bump version to ${newVersion}"`, 'yellow');
+      log(`3. Create tag: git tag -a v${newVersion} -m "Release version ${newVersion}"`, 'yellow');
+      log(`4. Push: git push origin ${getCurrentBranch()} --tags`, 'yellow');
+    }
   } catch (error) {
     log(`\n❌ Error: ${error.message}`, 'red');
     process.exit(1);
