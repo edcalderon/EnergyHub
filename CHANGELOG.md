@@ -1,9 +1,26 @@
 # Changelog
 
 ## [1.0.4] - 2025-11-03
-### PATCH
-- Auto-generated release entry
-- Git commit: 92bdb58
+
+### Added
+- Automatic git commit and push functionality in versioning script
+- Preload optimization for earth image in globe component
+- High priority fetch for critical earth image resource
+
+### Changed
+- Celsia theme now defaults on landing page (`/`) unless explicitly overridden
+- Enhanced theme provider to respect defaultTheme parameter correctly
+- Improved earth image loading performance with preload techniques
+- Optimized globe component with CSS performance hints (`willChange`, `backfaceVisibility`)
+- Version script now automatically commits, tags, and pushes on release
+
+### Performance
+- Reduced earth image loading time in production with strategic preloading
+- Added fetchPriority="high" for critical earth image asset
+- Optimized globe animation rendering with hardware acceleration hints
+
+### Technical
+- Git commit: d81c4f8
 - Build date: 2025-11-03
 
 
