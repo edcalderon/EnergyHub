@@ -221,34 +221,31 @@ export default function MapaCortesPage() {
   };
 
   return (
-    <div className="relative font-sans text-gray-800 overflow-x-hidden bg-white dark:bg-background [data-theme='celsia']:bg-[hsl(var(--background))]">
-
-      {showBackButton && (
-        <div className="max-w-7xl mx-auto px-6 pt-4">
-          <Button variant="ghost" size="sm" className="mb-4" onClick={handleBackToDashboard}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver al Dashboard
-          </Button>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-background w-full relative font-sans text-gray-800 overflow-x-hidden">
 
       {/* Main Content */}
-      <main className="w-full max-w-full px-4 sm:px-6 py-4 md:py-8 lg:pt-8">
-        {/* Title Section */}
-        <div className="w-full max-w-7xl mx-auto mb-4 sm:mb-6 md:mb-8 px-0">
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Estado de Mi servicio
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Visualización en tiempo real de interrupciones programadas y no programadas
-            </p>
+      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
+        {showBackButton && (
+          <div className="mb-4">
+            <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver al Dashboard
+            </Button>
           </div>
+        )}
+
+        {/* Title Section */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Estado Servicio
+          </h1>
+          <p className="text-muted-foreground">
+            Visualización en tiempo real de interrupciones programadas y no programadas
+          </p>
         </div>
 
         {/* Map Container */}
-        <div className="w-full max-w-7xl mx-auto">
+        <div className="w-full">
           {/* Location Tabs - Only show on mobile */}
           <div className="block lg:hidden mb-4 px-2">
             <Tabs
@@ -270,7 +267,7 @@ export default function MapaCortesPage() {
               initial={{ opacity: 0, y: 8 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }} 
-              className="h-[400px] sm:h-[500px] md:h-[600px] w-full"
+              className="h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] w-full"
             >
               <Card className="h-full w-full rounded-2xl md:rounded-3xl border-orange-100/60 shadow-sm md:shadow-md overflow-hidden relative">
                 <CardContent className="h-full p-0">
@@ -422,7 +419,7 @@ export default function MapaCortesPage() {
       </main>
 
       {/* Construcción de Líneas y Limpieza */}
-      <section className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 md:py-6">
+      <section className="container mx-auto px-4 py-6 w-full max-w-full">
         <motion.div 
           initial={{ opacity: 0, y: 8 }} 
           animate={{ opacity: 1, y: 0 }} 

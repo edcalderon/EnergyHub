@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.6] - 2025-11-04
+### PATCH
+- Mejoras en la página de tarifas:
+  - Definición del CU movida arriba como texto fijo
+  - Badge "Para la información ampliada" con scroll infinito
+  - Botones rápidos para IPP, Contribución y Restricciones
+  - Imágenes actualizadas a carpeta costo-unitario con soporte para múltiples imágenes
+  - Galería interactiva de imágenes con intercambio al hacer clic
+  - Nombres completos de componentes en tabla y gráficas
+  - Tooltips informativos en cada componente
+  - Eliminada sección "Información Tarifaria"
+  - Orden de pestañas cambiado (Evolución de Tarifa primero)
+  - Puntos de gráficas mejorados
+- Correcciones en notificaciones:
+  - Incremento corregido a 0,9% en alertas
+  - Fecha corregida a diciembre de 2025 en IPP
+
 ## [1.0.5] - 2025-11-03
 
 ### Added

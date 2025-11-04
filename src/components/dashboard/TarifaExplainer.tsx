@@ -4,20 +4,23 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { Lightbulb } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getAssetUrl } from "@/lib/url-utils";
 
 type ComponentKey = "G" | "T" | "D" | "C" | "Perdidas" | "Otros";
 
-const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string; color: string; image: string; example: string } > = {
+const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string; color: string; image: string | string[]; example: string } > = {
   G: {
     title: "Generación (G)",
     description:
       "Es el costo de producir la energía que llega a tu empresa; depende del clima, los combustibles y la disponibilidad de las plantas generadoras.",
     color: "#1f77b4",
-    image: getAssetUrl("/images/generacion.png"),
+    image: [
+      getAssetUrl("/images/costo-unitario/generacion-1.jpg"),
+      getAssetUrl("/images/costo-unitario/generacion-2.jpg")
+    ],
     example: "Ejemplo: cuando hay sequía y baja el nivel de los embalses, el costo de generación suele subir.",
   },
   T: {
@@ -25,7 +28,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el peaje eléctrico por usar las autopistas de alta tensión que llevan la energía desde las plantas hasta tu región.",
     color: "#ff7f0e",
-    image: getAssetUrl("/images/transmision.png"),
+    image: getAssetUrl("/images/costo-unitario/transmision.jpeg"),
     example: "Ejemplo: como pagar un peaje por usar una autopista nacional, pero para la electricidad.",
   },
   D: {
@@ -33,7 +36,10 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el valor por usar las redes locales que entregan la energía directamente a tu punto de conexión.",
     color: "#2ca02c",
-    image: getAssetUrl("/images/distribucion.png"),
+    image: [
+      getAssetUrl("/images/costo-unitario/distribucion-1.webp"),
+      getAssetUrl("/images/costo-unitario/distribucion-2.webp")
+    ],
     example: "Ejemplo: las redes del barrio que llevan la energía a tu sede.",
   },
   C: {
@@ -41,7 +47,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el valor por el servicio que hace posible que recibas tu energía a tiempo, con acompañamiento cercano y la buena energía de Celsia.",
     color: "#17becf",
-    image: getAssetUrl("/images/comercializacion.png"),
+    image: getAssetUrl("/images/costo-unitario/Imagen7.jpg"),
     example: "Ejemplo: la atención y gestión comercial para que tu servicio funcione sin sorpresas.",
   },
   Perdidas: {
@@ -49,7 +55,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Son pequeñas cantidades de energía que se pierden en el camino hasta tu empresa y que la regulación permite incluir para mantener el equilibrio del sistema.",
     color: "#9467bd",
-    image: getAssetUrl("/images/perdidas.svg"),
+    image: getAssetUrl("/images/costo-unitario/perdidas.webp"),
     example: "Ejemplo: calor en cables y transformadores que hace que parte de la energía no llegue.",
   },
   Otros: {
@@ -57,7 +63,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Cobros obligatorios fijados por el Estado que ayudan a mantener estable y confiable el servicio de energía en todo el país.",
     color: "#8c564b",
-    image: "/images/otros.svg",
+    image: getAssetUrl("/images/costo-unitario/Imagen 6.webp"),
     example: "Ejemplo: contribuciones y cargos regulatorios para mantener el sistema confiable.",
   },
 };
@@ -65,6 +71,36 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
 export default function TarifaExplainer() {
   const keys: ComponentKey[] = ["G", "T", "D", "C", "Perdidas", "Otros"];
   const [selectedComponent, setSelectedComponent] = useState<ComponentKey | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [swappedImages, setSwappedImages] = useState<Record<string, boolean>>({});
+
+  const scrollToSection = (sectionId: string) => {
+    setDialogOpen(true);
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        // Buscar el contenedor scrollable del dialog
+        const dialog = element.closest('[role="dialog"]');
+        const scrollableContainer = dialog?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement || 
+                                   dialog?.querySelector('.overflow-y-auto') as HTMLElement ||
+                                   dialog as HTMLElement;
+        
+        if (scrollableContainer && element) {
+          const elementTop = element.offsetTop;
+          const containerTop = scrollableContainer.scrollTop;
+          const offset = 20; // Espacio adicional desde el borde superior
+          
+          scrollableContainer.scrollTo({
+            top: elementTop + containerTop - offset,
+            behavior: 'smooth'
+          });
+        } else {
+          // Fallback: scroll normal
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }, 300);
+  };
 
   return (
     <Card className="p-6 space-y-4">
@@ -78,6 +114,18 @@ export default function TarifaExplainer() {
           </div>
         </div>
       </div>
+
+      {/* Definición del CU como texto fijo */}
+      <Card className="p-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">¿Qué es el CU (Costo Unitario)?</h3>
+          <p className="text-muted-foreground">
+            El Costo Unitario (CU) es el precio que pagas por cada kilovatio-hora (kWh) de energía eléctrica que consumes. 
+            Este costo se compone de varios elementos que cubren todo el proceso desde la generación hasta la entrega 
+            de la energía en tu empresa.
+          </p>
+        </div>
+      </Card>
 
       <div className="flex flex-wrap items-center gap-3 text-lg">
         <motion.span 
@@ -124,43 +172,122 @@ export default function TarifaExplainer() {
                   <p className="text-sm text-muted-foreground italic">{COMPONENT_INFO[selectedComponent].example}</p>
                 </div>
                 
-                <div className="flex justify-center">
-                  <img 
-                    src={COMPONENT_INFO[selectedComponent].image} 
-                    alt={COMPONENT_INFO[selectedComponent].title}
-                    className="max-w-full h-auto max-h-48 object-contain rounded-lg"
-                  />
+                <div className="flex justify-center items-center gap-4">
+                  {Array.isArray(COMPONENT_INFO[selectedComponent].image) ? (
+                    (() => {
+                      const images = COMPONENT_INFO[selectedComponent].image as string[];
+                      const isSwapped = swappedImages[selectedComponent] || false;
+                      const displayImages = isSwapped ? [...images].reverse() : images;
+                      
+                      const handleImageClick = (clickedIdx: number) => {
+                        // Only allow swapping when clicking on the smaller image (second position)
+                        const isSmallerImage = clickedIdx === 1;
+                        if (isSmallerImage) {
+                          setSwappedImages(prev => ({
+                            ...prev,
+                            [selectedComponent]: !prev[selectedComponent]
+                          }));
+                        }
+                      };
+                      
+                      return displayImages.map((img, idx) => {
+                        const isSecond = idx === 1; // Always the second image in display order
+                        return (
+                          <motion.div 
+                            key={img} 
+                            className="flex items-center"
+                            layout
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                          >
+                            <motion.img 
+                              src={img} 
+                              alt={`${COMPONENT_INFO[selectedComponent].title} ${idx + 1}`}
+                              className={`object-contain rounded-lg transition-all ${
+                                isSecond 
+                                  ? 'max-w-[60%] h-auto max-h-32 opacity-80 cursor-pointer hover:opacity-100' 
+                                  : 'max-w-full h-auto max-h-48'
+                              }`}
+                              onClick={() => handleImageClick(idx)}
+                              whileHover={isSecond ? { scale: 1.05 } : {}}
+                              transition={{ duration: 0.4, ease: "easeInOut" }}
+                              layout
+                            />
+                            {idx < displayImages.length - 1 && (
+                              <div className="w-4 h-4 mx-2" />
+                            )}
+                          </motion.div>
+                        );
+                      });
+                    })()
+                  ) : (
+                    <img 
+                      src={COMPONENT_INFO[selectedComponent].image as string} 
+                      alt={COMPONENT_INFO[selectedComponent].title}
+                      className="max-w-full h-auto max-h-48 object-contain rounded-lg"
+                    />
+                  )}
                 </div>
               </div>
             </div>
           </Card>
-        ) : (
-          <Card className="p-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">¿Qué es el CU (Costo Unitario)?</h3>
-              <p className="text-muted-foreground">
-                El Costo Unitario (CU) es el precio que pagas por cada kilovatio-hora (kWh) de energía eléctrica que consumes. 
-                Este costo se compone de varios elementos que cubren todo el proceso desde la generación hasta la entrega 
-                de la energía en tu empresa.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Haz clic en cualquiera de los componentes de la fórmula para conocer más detalles sobre cada uno.
-              </p>
-            </div>
-          </Card>
-        )}
+        ) : null}
       </motion.div>
       
-      {/* Enlace con ícono en esquina inferior derecha */}
-      <div className="flex justify-end pt-2">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors p-0 h-auto">
-              <Lightbulb className="h-3 w-3" />
-              ¿Quieres conocer más?
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      {/* Sección de información ampliada y botones rápidos con scroll infinito */}
+      <div className="pt-4 overflow-hidden">
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <div className="flex items-center gap-3 relative">
+            {/* Badge estático */}
+            <DialogTrigger asChild>
+              <Badge 
+                variant="outline" 
+                className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-muted/50 transition-colors border-2 whitespace-nowrap flex-shrink-0"
+              >
+                Para la información ampliada de los componentes haz clic aquí
+                <ChevronRight className="h-4 w-4" />
+              </Badge>
+            </DialogTrigger>
+            
+            {/* Contenedor con scroll infinito para todos los botones */}
+            <div className="flex-1 min-w-0 overflow-hidden relative">
+              <div className="flex items-center gap-3 animate-scroll-infinite whitespace-nowrap">
+                {/* Contenido duplicado para scroll infinito - duplicamos para crear el efecto de bucle */}
+                {[...Array(4)].map((_, loopIndex) => (
+                  <div key={loopIndex} className="flex items-center gap-3 flex-shrink-0">
+                    {/* Botones rápidos para Restricciones, IPP y Contribución */}
+                    <Button 
+                      variant="outline" 
+                      size="default"
+                      className="flex items-center gap-2 border hover:bg-muted/50 transition-colors whitespace-nowrap"
+                      onClick={() => scrollToSection('restricciones')}
+                    >
+                      Restricciones
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="default"
+                      className="flex items-center gap-2 border hover:bg-muted/50 transition-colors whitespace-nowrap"
+                      onClick={() => scrollToSection('ipp')}
+                    >
+                      Indexador de Precios (IPP)
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="default"
+                      className="flex items-center gap-2 border hover:bg-muted/50 transition-colors whitespace-nowrap"
+                      onClick={() => scrollToSection('contribucion')}
+                    >
+                      Contribución
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <DialogContent 
+            className="max-w-4xl max-h-[80vh] overflow-y-auto"
+          >
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">Definiciones de La Tarifa de Energía</DialogTitle>
               <DialogDescription>
@@ -296,7 +423,7 @@ export default function TarifaExplainer() {
               </Card>
 
               {/* Restricciones */}
-              <Card className="p-4">
+              <Card id="restricciones" className="p-4 scroll-mt-4">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">💡</div>
                   <div className="flex-1">
@@ -318,7 +445,7 @@ export default function TarifaExplainer() {
               </Card>
 
               {/* Contribución */}
-              <Card className="p-4">
+              <Card id="contribucion" className="p-4 scroll-mt-4">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">💡</div>
                   <div className="flex-1">
@@ -364,7 +491,7 @@ export default function TarifaExplainer() {
               </Card>
 
               {/* IPP */}
-              <Card className="p-4">
+              <Card id="ipp" className="p-4 scroll-mt-4">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">💡</div>
                   <div className="flex-1">
