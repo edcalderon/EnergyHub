@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7] - 2025-11-04
+### PATCH
+- Auto-generated release entry
+- Git commit: da80025
+- Build date: 2025-11-04
+
+
 ## [1.0.5] - 2025-11-03
 
 ### Added

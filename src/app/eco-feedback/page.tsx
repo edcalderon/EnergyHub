@@ -30,8 +30,8 @@ export default function EcoFeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full">
+    <div className="min-h-screen bg-background w-full">
+      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
         {showBackButton && (
           <div className="mb-4">
             <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
@@ -42,7 +42,7 @@ export default function EcoFeedbackPage() {
         )}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Mi informe de energía
+            Informe Energía
           </h1>
           <p className="text-muted-foreground">
             Impacto ambiental de tu consumo energético y recomendaciones sostenibles

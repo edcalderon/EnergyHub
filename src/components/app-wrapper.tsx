@@ -25,7 +25,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
 
   const sidebarLinks = [
     {
-      label: "Panel de energía",
+      label: "Panel",
       href: "/dashboard",
       icon: (
         <div className="relative group/icon flex items-center justify-center">
@@ -61,7 +61,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
       ),
     },
     {
-      label: "Mi informe de energía",
+      label: "Informe Energía",
       href: "/eco-feedback",
       icon: (
         <div className="relative group/icon flex items-center justify-center">
@@ -79,7 +79,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
       ),
     },
     {
-      label: "Estado de Mi servicio",
+      label: "Estado Servicio",
       href: "/mapa-cortes",
       icon: (
         <div className="relative group/icon flex items-center justify-center">

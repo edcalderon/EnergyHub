@@ -1,17 +1,17 @@
 "use client";
 
-import TariffSection from "@/components/dashboard/TariffSection";
 import TarifaExplainer from "@/components/dashboard/TarifaExplainer";
-import { TarifaLineChart, TarifaPie, TarifaVigenteTabla, TarifaEvolutionTabs } from "@/components/dashboard/TarifaVisuals";
-import Link from "next/link";
+import { TarifaPie, TarifaVigenteTabla, TarifaEvolutionTabs } from "@/components/dashboard/TarifaVisuals";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/contexts/user-context";
 
 export default function TarifasPage() {
   const [showBackButton, setShowBackButton] = useState(false);
   const router = useRouter();
+  const { user } = useUser();
 
   useEffect(() => {
     // Check if user came from dashboard using sessionStorage
@@ -28,8 +28,8 @@ export default function TarifasPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full">
+    <div className="min-h-screen bg-background w-full">
+      <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
         <div className="mb-6">
           {showBackButton && (
             <Button variant="ghost" size="sm" className="mb-4" onClick={handleBackToDashboard}>
@@ -38,10 +38,13 @@ export default function TarifasPage() {
             </Button>
           )}
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Mi tarifa
+            ¡Hola, {user?.nombre || "Usuario"}!
           </h1>
+          <p className="text-muted-foreground mb-2">
+            ¡Te saludamos con la mejor energía de Celsia!
+          </p>
           <p className="text-muted-foreground">
-            Desglose detallado de costos energéticos y planes alternativos
+            A continuación te mostraremos los conceptos de tu Tarifa de energía
           </p>
         </div>
 
@@ -57,9 +60,6 @@ export default function TarifasPage() {
 
           {/* Tendencia por componente */}
           <TarifaEvolutionTabs />
-
-          {/* Sección existente (planes/alertas) al final para mantener funcionalidad previa */}
-          <TariffSection />
         </div>
       </main>
     </div>

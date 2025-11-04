@@ -3,6 +3,7 @@
 import ReactECharts from "echarts-for-react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const months = [
   "mar-25",
@@ -33,6 +34,24 @@ const colors = {
   C: "#17becf",
   Perdidas: "#9467bd",
   Otros: "#8c564b",
+};
+
+const componentNames: Record<string, string> = {
+  G: "Generación",
+  T: "Transmisión",
+  D: "Distribución",
+  C: "Comercialización",
+  Perdidas: "Pérdidas",
+  Otros: "Otros",
+};
+
+const componentNotes: Record<string, string> = {
+  G: "Indexado parcialmente al IPP y variación del precio de bolsa",
+  T: "Ajuste regulado anual, pero se refleja mensualmente",
+  D: "Indexado al IPP, leve variación mensual",
+  C: "Estable, depende de costos operativos",
+  Perdidas: "Variación técnica reconocida",
+  Otros: "Restricciones, CREG, SIC, contribuciones",
 };
 
 export function TarifaLineChart() {
@@ -68,36 +87,65 @@ export function TarifaPie() {
 
   const option = {
     tooltip: { trigger: "item", formatter: "{b}: {c} ($ {d}%)" },
-    legend: { bottom: 10 },
+    legend: { 
+      show: false
+    },
     series: [
       {
         name: "Composición",
         type: "pie",
-        radius: ["55%", "80%"],
+        radius: ["50%", "75%"],
+        center: ["50%", "45%"],
         avoidLabelOverlap: true,
         itemStyle: { borderRadius: 6, borderColor: "#fff", borderWidth: 2 },
         label: { 
           show: true, 
           position: "outside",
           formatter: "{b}\n{d}%",
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: "bold",
-          distance: 15,
-          alignTo: "edge",
-          edgeDistance: 10,
-          bleedMargin: 5,
-          minShowLabelAngle: 10
+          distance: 25,
+          alignTo: "labelLine",
+          edgeDistance: 5,
+          bleedMargin: 10,
+          minShowLabelAngle: 15,
+          rich: {
+            name: {
+              fontSize: 11,
+              fontWeight: "bold",
+              lineHeight: 16
+            },
+            percent: {
+              fontSize: 10,
+              fontWeight: "normal"
+            }
+          }
         },
         labelLine: {
           show: true,
-          length: 15,
-          length2: 10,
-          smooth: true
+          length: 20,
+          length2: 15,
+          smooth: 0.3,
+          lineStyle: {
+            width: 1.5,
+            type: "solid"
+          }
         },
-        emphasis: { label: { show: true, fontSize: 14, fontWeight: "bold" } },
+        emphasis: { 
+          label: { 
+            show: true, 
+            fontSize: 13, 
+            fontWeight: "bold",
+            distance: 30
+          },
+          labelLine: {
+            length: 25,
+            length2: 18
+          }
+        },
         data: parts.map((p) => ({ 
           value: p.value, 
-          name: p.name, 
+          name: componentNames[p.name] || p.name, 
           itemStyle: { color: (colors as any)[p.name] } 
         })),
       },
@@ -146,6 +194,7 @@ export function TarifaEvolutionTabs() {
       type: "line",
       smooth: true,
       symbol: "circle",
+      symbolSize: 6,
       lineStyle: { width: 2, color: (colors as any)[name] },
       itemStyle: { color: (colors as any)[name] },
       data,
@@ -169,6 +218,7 @@ export function TarifaEvolutionTabs() {
       type: "line",
       smooth: true,
       symbol: "circle",
+      symbolSize: 8,
       lineStyle: { width: 3, color: "#ff7f0e" },
       itemStyle: { color: "#ff7f0e" },
       data: totalValues,
@@ -178,16 +228,16 @@ export function TarifaEvolutionTabs() {
   return (
     <Card className="p-4">
       <h3 className="font-semibold mb-4">Evolución de la Tarifa</h3>
-      <Tabs defaultValue="componentes" className="w-full">
+      <Tabs defaultValue="tarifa" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="componentes">Evolución por Componentes</TabsTrigger>
           <TabsTrigger value="tarifa">Evolución de la Tarifa</TabsTrigger>
+          <TabsTrigger value="componentes">Evolución por Componentes</TabsTrigger>
         </TabsList>
-        <TabsContent value="componentes" className="mt-4">
-          <ReactECharts option={componentOption} style={{ height: 320 }} />
-        </TabsContent>
         <TabsContent value="tarifa" className="mt-4">
           <ReactECharts option={tariffOption} style={{ height: 320 }} />
+        </TabsContent>
+        <TabsContent value="componentes" className="mt-4">
+          <ReactECharts option={componentOption} style={{ height: 320 }} />
         </TabsContent>
       </Tabs>
     </Card>
@@ -201,7 +251,7 @@ export function TarifaVigenteTabla() {
     D: 188.29,
     C: 183.69,
     Perdidas: 74.76,
-    Otros: 3.72,
+    Otros: 23.72,
   };
   const total = Object.values(dec).reduce((s, v) => s + v, 0);
 
@@ -214,34 +264,52 @@ export function TarifaVigenteTabla() {
   return (
     <Card className="p-4">
       <h3 className="font-semibold mb-3">Tarifa vigente — dic-25</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-muted-foreground">
-              <th className="py-2 pr-3">Componente</th>
-              <th className="py-2 pr-3">Valor ($/kWh)</th>
-              <th className="py-2">Participación</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.k} className="border-t">
-                <td className="py-2 pr-3 flex items-center gap-2">
-                  <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: (colors as any)[r.k as keyof typeof colors] }} />
-                  {r.k}
-                </td>
-                <td className="py-2 pr-3">$ {r.v.toFixed(2)}</td>
-                <td className="py-2">{r.p.toFixed(2)}%</td>
+      <TooltipProvider>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-muted-foreground">
+                <th className="py-2 pr-3">Componente</th>
+                <th className="py-2 pr-3">Valor ($/kWh)</th>
+                <th className="py-2">Participación</th>
               </tr>
-            ))}
-            <tr className="border-t font-semibold">
-              <td className="py-2 pr-3">Tarifa</td>
-              <td className="py-2 pr-3">$ {total.toFixed(2)}</td>
-              <td className="py-2">100.00%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <Tooltip key={r.k}>
+                  <TooltipTrigger asChild>
+                    <tr className="border-t cursor-help hover:bg-muted/30 transition-colors">
+                      <td className="py-2 pr-3 flex items-center gap-2">
+                        <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: (colors as any)[r.k as keyof typeof colors] }} />
+                        {componentNames[r.k] || r.k}
+                      </td>
+                      <td className="py-2 pr-3">$ {r.v.toFixed(2)}</td>
+                      <td className="py-2">{r.p.toFixed(2)}%</td>
+                    </tr>
+                  </TooltipTrigger>
+                  {componentNotes[r.k] && (
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="text-sm">{componentNotes[r.k]}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              ))}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <tr className="border-t font-semibold cursor-help hover:bg-muted/30 transition-colors">
+                    <td className="py-2 pr-3">Tarifa</td>
+                    <td className="py-2 pr-3">$ {total.toFixed(2)}</td>
+                    <td className="py-2">100.00%</td>
+                  </tr>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  <p className="text-sm">Resultado ponderado de los anteriores</p>
+                </TooltipContent>
+              </Tooltip>
+            </tbody>
+          </table>
+        </div>
+      </TooltipProvider>
     </Card>
   );
 }
