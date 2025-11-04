@@ -12,20 +12,23 @@ const months = [
   "jun-25",
   "jul-25",
   "ago-25",
-  "sep-25",
+  "sept-25",
   "oct-25",
   "nov-25",
   "dic-25",
 ];
 
 const seriesData = {
-  G: [373.75, 375.78, 382.52, 381.5, 381.34, 396.42, 397.59, 397.41, 394.07, 400.22],
-  T: [52.32, 52.61, 53.55, 53.41, 53.39, 55.5, 55.66, 55.64, 55.17, 56.03],
-  D: [175.84, 176.79, 179.96, 179.48, 179.41, 186.5, 187.05, 186.97, 185.4, 188.29],
-  C: [171.54, 172.47, 175.57, 175.1, 175.03, 181.95, 182.48, 182.4, 180.87, 183.69],
+  G: [373.75, 375.78, 382.52, 381.50, 381.34, 396.42, 397.59, 397.41, 394.07, 400.22],
+  T: [52.32, 52.61, 53.55, 53.41, 53.39, 55.50, 55.66, 55.64, 55.17, 56.03],
+  D: [175.84, 176.79, 179.96, 179.48, 179.41, 186.50, 187.05, 186.97, 185.40, 188.29],
+  C: [171.54, 172.47, 175.57, 175.10, 175.03, 181.95, 182.48, 182.40, 180.87, 183.69],
   Perdidas: [69.82, 70.19, 71.45, 71.26, 71.23, 74.05, 74.27, 74.23, 73.61, 74.76],
-  Otros: [22.15, 22.27, 22.67, 22.61, 22.6, 23.49, 23.56, 23.55, 23.36, 23.72],
+  Otros: [22.15, 22.27, 22.67, 22.61, 22.60, 23.49, 23.56, 23.55, 23.36, 23.72],
 };
+
+// Tariff totals for each month
+const tariffTotals = [865.42, 870.12, 885.73, 883.36, 883.00, 917.91, 920.63, 920.20, 912.47, 926.71];
 
 const colors = {
   G: "#1f77b4",
@@ -179,9 +182,8 @@ export function TarifaPie() {
 
 export function TarifaEvolutionTabs() {
   const lastIdx = months.length - 1;
-  const totalValues = months.map((_, index) => 
-    Object.values(seriesData).reduce((sum, arr) => sum + arr[index], 0)
-  );
+  // Use actual tariff totals from data
+  const totalValues = tariffTotals;
 
   const componentOption = {
     tooltip: { trigger: "axis" },
@@ -253,12 +255,22 @@ export function TarifaVigenteTabla() {
     Perdidas: 74.76,
     Otros: 23.72,
   };
-  const total = Object.values(dec).reduce((s, v) => s + v, 0);
+  const total = 926.71; // Tarifa total de dic-25
+  
+  // Use actual percentages from data
+  const percentages: Record<string, number> = {
+    G: 43.19,
+    T: 6.05,
+    D: 20.32,
+    C: 19.82,
+    Perdidas: 8.07,
+    Otros: 2.56,
+  };
 
   const rows = Object.entries(dec).map(([k, v]) => ({
     k,
     v,
-    p: (v / total) * 100,
+    p: percentages[k] || (v / total) * 100,
   }));
 
   return (

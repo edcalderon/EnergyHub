@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import EcoFeedbackSystem from "@/components/dashboard/EcoFeedbackSystem";
+import TariffSimulator from "@/components/dashboard/TariffSimulator";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Leaf } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
 
-export default function EcoFeedbackPage() {
+export default function SimuladorTarifasPage() {
   const [showBackButton, setShowBackButton] = useState(false);
   const router = useRouter();
   const { user } = useUser();
@@ -42,21 +42,19 @@ export default function EcoFeedbackPage() {
             </Button>
           </div>
         )}
+        
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            ¡Hola, {user?.nombre || "Usuario"}!
+            Simulación de Tarifas Flexibles
           </h1>
-          <p className="text-muted-foreground mb-2">
-            ¡En Celsia queremos enviarte un saludo cargado de buena energía y decirte que estamos aquí para ti!
+          <p className="text-muted-foreground">
+            Explora diferentes escenarios tarifarios y visualiza su impacto en tus costos energéticos
           </p>
-          <p className="text-muted-foreground mb-4">
-            A continuación te mostraremos tu Informe de energía mensual.
-          </p>
-          <h2 className="text-xl font-semibold text-foreground">Informe de Energía</h2>
         </div>
 
-        <EcoFeedbackSystem />
+        <TariffSimulator />
       </main>
     </div>
   );
 }
+

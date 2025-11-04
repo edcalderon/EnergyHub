@@ -96,6 +96,27 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
         </div>
       ),
     },
+    {
+      label: "Simulación de Tarifas",
+      href: "/simulador-tarifas",
+      icon: (
+        <div className="relative group/icon flex items-center justify-center">
+          <Image
+            src={getAssetUrl("/Iconos/sidebar/tarifas.png")}
+            alt="Simulación de Tarifas"
+            width={36}
+            height={36}
+            className={cn(
+              "object-contain relative z-10 transition-transform duration-300",
+              (sidebarOpen || sidebarLocked) ? "h-7 w-7" : "h-9 w-9"
+            )}
+          />
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border-2 border-white min-w-[18px] h-4 flex items-center justify-center leading-none z-20">
+            NEW
+          </span>
+        </div>
+      ),
+    },
   ];
 
   return (
