@@ -32,7 +32,7 @@ export default function RootLayout({
                 try {
                   if (typeof window !== 'undefined') {
                     const isLandingPage = window.location.pathname === '/';
-                    const defaultTheme = 'light'; // Light mode is now default
+                    const defaultTheme = isLandingPage ? 'celsia' : 'light'; // Celsia mode default for landing page
                     const storedTheme = localStorage.getItem('energyhub-theme');
                     const theme = storedTheme || defaultTheme;
                     document.documentElement.classList.remove('dark', 'light', 'celsia');

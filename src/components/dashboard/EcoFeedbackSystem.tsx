@@ -1616,7 +1616,7 @@ export default function EcoFeedbackSystem() {
           
           {/* Variación anual (YoY) - Ocupa toda la fila */}
           {showComparison && metrics.sameMonthLastYear && (
-            <Card className={`p-4 mt-4 ${metrics.yoyVariation < 0 ? 'bg-green-50 border-green-100' : metrics.yoyVariation > 0 ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}`}>
+            <Card className={`p-4 mt-4 ${metrics.yoyVariation < 0 ? 'bg-green-50 border-green-100' : metrics.yoyVariation > 0 ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100'}`}>
               <p className="text-xs text-muted-foreground mb-1">Variación anual (YoY)</p>
               <p className="text-xs text-muted-foreground mb-1">
                 Compara el consumo del mes actual ({metrics.currentMonthName}) con el mismo mes del {metrics.yoyYearLabel} ({metrics.sameMonthLastYear.month})
@@ -1625,9 +1625,9 @@ export default function EcoFeedbackSystem() {
                 {metrics.yoyVariation < 0 ? (
                   <TrendingDown className="h-5 w-5 text-green-600" />
                 ) : metrics.yoyVariation > 0 ? (
-                  <TrendingUp className="h-5 w-5 text-red-600" />
+                  <TrendingUp className="h-5 w-5 text-orange-600" />
                 ) : null}
-                <p className={`text-2xl font-bold ${metrics.yoyVariation < 0 ? 'text-green-600' : metrics.yoyVariation > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                <p className={`text-2xl font-bold ${metrics.yoyVariation < 0 ? 'text-green-600' : metrics.yoyVariation > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
                   {metrics.yoyVariation < 0 ? '↓' : metrics.yoyVariation > 0 ? '↑' : ''}{Math.abs(Math.round(metrics.yoyVariation))}%
                 </p>
               </div>
@@ -2161,7 +2161,7 @@ export default function EcoFeedbackSystem() {
           {/* Main text */}
           <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-100">
             <p className="text-sm text-foreground leading-relaxed">
-              Pagaste <span className="font-semibold">${formatNumber(metrics.currentMonth * 850)} COP</span>, con una tarifa promedio de <span className="font-semibold">$850/kWh</span>, que aumentó <span className="font-semibold text-red-600">5%</span> frente al mes anterior. Aun así, mantienes una tendencia positiva de ahorro en los últimos meses (<span className="font-semibold text-green-600">–{Math.abs(Math.round(metrics.accumulatedSavings || 27))}%</span> en promedio).
+              Pagaste <span className="font-semibold">${formatNumber(metrics.currentMonth * 850)} COP</span>, con una tarifa promedio de <span className="font-semibold">$850/kWh</span>, que aumentó <span className="font-semibold text-orange-600">5%</span> frente al mes anterior. Aun así, mantienes una tendencia positiva de ahorro en los últimos meses (<span className="font-semibold text-green-600">–{Math.abs(Math.round(metrics.accumulatedSavings || 27))}%</span> en promedio).
             </p>
           </div>
           
@@ -2196,9 +2196,9 @@ export default function EcoFeedbackSystem() {
               const lastYearCost = metrics.sameMonthLastYear.value * 850;
               const costDifference = currentCost - lastYearCost;
               return (
-                <div className={`p-4 rounded-lg border ${costDifference < 0 ? 'bg-green-50 border-green-100' : costDifference > 0 ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}`}>
+                <div className={`p-4 rounded-lg border ${costDifference < 0 ? 'bg-green-50 border-green-100' : costDifference > 0 ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100'}`}>
                   <p className="text-xs font-semibold text-foreground mb-1 uppercase tracking-wide">Costo vs año pasado</p>
-                  <p className={`text-2xl font-bold ${costDifference < 0 ? 'text-green-600' : costDifference > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                  <p className={`text-2xl font-bold ${costDifference < 0 ? 'text-green-600' : costDifference > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
                     {costDifference < 0 ? '-' : '+'}${formatNumber(Math.abs(costDifference))} COP
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -2215,9 +2215,9 @@ export default function EcoFeedbackSystem() {
               const previousMonthCost = previousMonthData ? previousMonthData.value * 850 : currentCost;
               const costDifference = currentCost - previousMonthCost;
               return (
-                <div className={`p-4 rounded-lg border ${costDifference < 0 ? 'bg-green-50 border-green-100' : costDifference > 0 ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}`}>
+                <div className={`p-4 rounded-lg border ${costDifference < 0 ? 'bg-green-50 border-green-100' : costDifference > 0 ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100'}`}>
                   <p className="text-xs font-semibold text-foreground mb-1 uppercase tracking-wide">Costo vs mes anterior</p>
-                  <p className={`text-2xl font-bold ${costDifference < 0 ? 'text-green-600' : costDifference > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                  <p className={`text-2xl font-bold ${costDifference < 0 ? 'text-green-600' : costDifference > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
                     {costDifference < 0 ? '-' : '+'}${formatNumber(Math.abs(costDifference))} COP
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">

@@ -280,23 +280,23 @@ export function TarifaVigenteTabla() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-muted-foreground">
-                <th className="py-2 pr-3">Componente</th>
-                <th className="py-2 pr-3">Valor ($/kWh)</th>
-                <th className="py-2">Participación</th>
+              <tr className="text-left text-muted-foreground border-b">
+                <th className="py-2 pr-3 font-medium">Componente</th>
+                <th className="py-2 pr-3 font-medium">Valor ($/kWh)</th>
+                <th className="py-2 font-medium">Participación</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <Tooltip key={r.k}>
                   <TooltipTrigger asChild>
-                    <tr className="border-t cursor-help hover:bg-muted/30 transition-colors">
+                    <tr className="border-b cursor-help hover:bg-muted/50 transition-colors">
                       <td className="py-2 pr-3 flex items-center gap-2">
                         <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: (colors as any)[r.k as keyof typeof colors] }} />
                         {componentNames[r.k] || r.k}
                       </td>
-                      <td className="py-2 pr-3">$ {r.v.toFixed(2)}</td>
-                      <td className="py-2">{r.p.toFixed(2)}%</td>
+                      <td className="py-2 pr-3 text-foreground">$ {r.v.toFixed(2)}</td>
+                      <td className="py-2 text-foreground">{r.p.toFixed(2)}%</td>
                     </tr>
                   </TooltipTrigger>
                   {componentNotes[r.k] && (
@@ -308,10 +308,10 @@ export function TarifaVigenteTabla() {
               ))}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <tr className="border-t font-semibold cursor-help hover:bg-muted/30 transition-colors">
+                  <tr className="border-t-2 border-primary/20 font-semibold cursor-help hover:bg-muted/50 transition-colors bg-muted/20">
                     <td className="py-2 pr-3">Tarifa</td>
-                    <td className="py-2 pr-3">$ {total.toFixed(2)}</td>
-                    <td className="py-2">100.00%</td>
+                    <td className="py-2 pr-3 text-foreground">$ {total.toFixed(2)}</td>
+                    <td className="py-2 text-foreground">100.00%</td>
                   </tr>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-xs">

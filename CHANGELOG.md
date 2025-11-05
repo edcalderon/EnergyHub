@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.8] - 2025-11-05
+### PATCH
+- Auto-generated release entry
+- Git commit: 7c89bba
+- Build date: 2025-11-05
+
+
+## [1.0.8] - 2025-11-04
+### PATCH
+- Auto-generated release entry
+- Git commit: 290c341
+- Build date: 2025-11-04
+
+
 ## [1.0.6] - 2025-11-04
 ### PATCH
 - Mejoras en la página de tarifas:

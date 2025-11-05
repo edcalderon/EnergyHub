@@ -18,6 +18,7 @@ import { StartJourneyForm } from "@/components/ui/start-journey-form";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { useTheme } from "@/components/theme-provider";
 
 // Reusable ScrollGlobe component following shadcn/ui patterns
 interface ScrollGlobeProps {
@@ -61,9 +62,13 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
   const [globeTransform, setGlobeTransform] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [globeContrastMode, setGlobeContrastMode] = useState<'light' | 'dark' | 'auto'>('auto');
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const energiaConectadaTextRef = useRef<HTMLDivElement | null>(null);
+  const ofertaPymesTextRef = useRef<HTMLDivElement | null>(null);
+  const mananaTextRef = useRef<HTMLDivElement | null>(null);
   const globeContainerRef = useRef<HTMLDivElement | null>(null);
   const animationFrameId = useRef<number>();
   const overlapCheckFrameId = useRef<number>();
@@ -77,26 +82,49 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
     }));
   }, [globeConfig.positions]);
 
-  // Check if hero text overlaps with globe (separate from scroll tracking)
+  // Check if text overlaps with globe for multiple sections (separate from scroll tracking)
   const checkTextGlobeOverlap = useCallback(() => {
-    if (!heroTextRef.current || !globeContainerRef.current || activeSection !== 0) {
-      if (activeSection !== 0) {
-        setGlobeContrastMode('auto');
-      }
+    if (!globeContainerRef.current) {
       return;
     }
 
-    const textRect = heroTextRef.current.getBoundingClientRect();
     const globeRect = globeContainerRef.current.getBoundingClientRect();
+    let hasOverlap = false;
 
-    const overlap = !(
-      textRect.right < globeRect.left ||
-      textRect.left > globeRect.right ||
-      textRect.bottom < globeRect.top ||
-      textRect.top > globeRect.bottom
-    );
+    // Check sections that need contrast mode detection:
+    // 0: Hero section (Centro de Energía Celsia)
+    // 1: Energia Conectada section
+    // 2: Oferta para Pymes section
+    // 4: Mañana section (last section)
+    const sectionsToCheck = [
+      { index: 0, ref: heroTextRef, active: activeSection === 0 },
+      { index: 1, ref: energiaConectadaTextRef, active: activeSection === 1 },
+      { index: 2, ref: ofertaPymesTextRef, active: activeSection === 2 },
+      { index: 4, ref: mananaTextRef, active: activeSection === 4 },
+    ];
 
-    if (overlap) {
+    // Only check overlap if we're in one of the sections that need detection
+    const currentSectionCheck = sectionsToCheck.find(s => s.active);
+    
+    if (currentSectionCheck && currentSectionCheck.ref.current) {
+      const textRect = currentSectionCheck.ref.current.getBoundingClientRect();
+      
+      hasOverlap = !(
+        textRect.right < globeRect.left ||
+        textRect.left > globeRect.right ||
+        textRect.bottom < globeRect.top ||
+        textRect.top > globeRect.bottom
+      );
+    }
+
+    // If we're not in any of the sections that need detection, set to auto
+    if (!currentSectionCheck) {
+      setGlobeContrastMode('auto');
+      return;
+    }
+
+    // Set contrast mode based on overlap
+    if (hasOverlap) {
       setGlobeContrastMode('light');
     } else {
       setGlobeContrastMode('auto');
@@ -236,7 +264,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
       </div>
 
       {/* Desktop Theme Switcher */}
-      <div className="hidden sm:flex fixed top-4 right-4 z-50">
+      <div className="hidden sm:flex fixed top-4 left-4 z-50">
         <ThemeSwitcher />
       </div>
 
@@ -301,7 +329,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
         className="fixed z-10 will-change-transform transition-all duration-[1400ms] ease-[cubic-bezier(0.23,1,0.32,1)]"
         style={{
           transform: globeTransform,
-          filter: `opacity(${activeSection === 3 ? 0.4 : 0.9})`,
+          filter: `opacity(${activeSection === 3 ? 0.4 : activeSection === 4 ? 0.9 : 0.9})`,
         }}
       >
         <div 
@@ -325,6 +353,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
           ref={(el) => { sectionRefs.current[index] = el; }}
           className={cn(
             "relative min-h-screen flex flex-col justify-center px-12 sm:px-16 md:px-24 lg:px-32 xl:px-40 z-20 py-12 sm:py-16 lg:py-20",
+            index === sections.length - 1 && "pb-32 sm:pb-40",
             "w-full max-w-full overflow-visible",
             section.align === 'center' && "items-center text-center",
             section.align === 'right' && "items-end text-right",
@@ -337,12 +366,21 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
             index === 0 ? "max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl" : "max-w-full"
           )}>
             
-            <h1 className={cn(
-              "font-bold mb-6 sm:mb-8 leading-[1.1] tracking-tight break-words overflow-visible whitespace-normal",
-              index === 0 
-                ? "text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl" 
-                : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl"
-            )}> 
+            <h1 
+              ref={
+                index === 0 ? heroTextRef :
+                index === 1 ? energiaConectadaTextRef :
+                index === 2 ? ofertaPymesTextRef :
+                index === 4 ? mananaTextRef :
+                null
+              }
+              className={cn(
+                "font-bold mb-6 sm:mb-8 leading-[1.1] tracking-tight break-words overflow-visible whitespace-normal",
+                index === 0 
+                  ? "text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl" 
+                  : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl"
+              )}
+            > 
               {section.subtitle ? (
                 <div className="space-y-2 sm:space-y-2">
                   <div className={cn(
@@ -354,7 +392,12 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
                         <Zap className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14 text-white" />
                       </div>
                     )}
-                    <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-foreground dark:to-foreground/80 bg-clip-text text-transparent break-words min-w-0 flex-1 py-2">
+                    <div className={cn(
+                      "break-words min-w-0 flex-1 py-2",
+                      theme === 'celsia' && index !== 0
+                        ? "text-[#f4721e]"
+                        : "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-foreground dark:to-foreground/80 bg-clip-text text-transparent"
+                    )}>
                       {section.title}
                     </div>
                   </div>
@@ -372,7 +415,12 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
                       <Zap className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14 text-white" />
                     </div>
                   )}
-                  <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-foreground dark:via-foreground dark:to-foreground/80 bg-clip-text text-transparent py-2">
+                  <div className={cn(
+                    "py-2",
+                    theme === 'celsia' && index !== 0
+                      ? "text-[#f4721e]"
+                      : "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-foreground dark:via-foreground dark:to-foreground/80 bg-clip-text text-transparent"
+                  )}>
                     {section.title}
                   </div>
                 </div>
@@ -385,7 +433,7 @@ function ScrollGlobe({ sections, globeConfig = defaultGlobeConfig, className, on
             )}>
               <p 
                 ref={index === 0 ? heroTextRef : null}
-                className="mb-3 sm:mb-4 text-foreground"
+                className="mb-3 sm:mb-4 text-foreground whitespace-pre-line"
               >
                 {section.description}
               </p>
@@ -565,16 +613,16 @@ export default function EnergyHubLanding() {
     {
       id: "features",
       badge: "Características",
-      title: "Energía Conectada",
-      description: "Desde el Valle del Cauca hacia el mundo, nuestro sistema de monitoreo energético conecta comunidades globales. Cada conexión representa eficiencia, cada interacción impulsa la sostenibilidad hacia un futuro energético global.",
+      title: "🌍 Energía Conectada",
+      description: "Desde el Valle del Cauca para el mundo, impulsamos una red de energía inteligente que une personas, empresas y territorios con buena energía. Cada conexión refleja eficiencia, innovación y sostenibilidad.",
       align: "center" as const,
     },
     {
       id: "marketplace",
       badge: "Market Place",
-      title: "Oferta para Pymes",
-      subtitle: "Soluciones Celsia",
-      description: "Explora soluciones de energía de Celsia diseñadas para pequeñas y medianas empresas.",
+      title: "Soluciones Celsia para Pymes",
+      subtitle: "Energía que impulsa tu negocio",
+      description: "Explora opciones diseñadas para pequeñas y medianas empresas: eficientes, confiables y a tu ritmo.",
       align: "left" as const,
       features: [
         {
@@ -605,9 +653,8 @@ export default function EnergyHubLanding() {
     {
       id: "capabilities",
       badge: "Capacidades",
-      title: "Expandiendo",
-      subtitle: "Posibilidades",
-      description: "A medida que expandimos nuestro sistema de monitoreo energético global desde el piloto del Valle del Cauca, emergen nuevas oportunidades de optimización. Lo que parecía complejo ayer se convierte en la base de hoy para una eficiencia energética global extraordinaria.",
+      title: "Tu energía, tus oportunidades",
+      description: "Lo que ayer parecía complejo, hoy es parte de una red inteligente que crece contigo.\n\nDesde el Valle del Cauca hacia el mundo, seguimos encendiendo nuevas formas de optimizar, innovar y avanzar juntos. 💛",
       align: "left" as const,
       features: [
         { 
@@ -645,9 +692,8 @@ export default function EnergyHubLanding() {
     {
       id: "future",
       badge: "Futuro",
-      title: "Mañana",
-      subtitle: "Sostenible",
-      description: "En este momento de transformación energética global, vemos un lienzo de potencial sostenible infinito. Cada optimización representa progreso, cada innovación construye puentes hacia nuestro futuro energético global colectivo.",
+      title: "Energía Sostenible, Futuro Posible",
+      description: "Hoy la energía se transforma, y con ella nuestras posibilidades.\n\nCada acción, cada dato y cada mejora crean puentes hacia un futuro donde la sostenibilidad es el motor de todo. 💛",
       align: "center" as const,
       actions: [
         { 
@@ -668,7 +714,7 @@ export default function EnergyHubLanding() {
       />
       
       {/* Mobile Theme Switcher */}
-      <div className="sm:hidden fixed top-4 right-4 z-50">
+      <div className="sm:hidden fixed top-4 left-4 z-50">
         <ThemeSwitcher />
       </div>
 

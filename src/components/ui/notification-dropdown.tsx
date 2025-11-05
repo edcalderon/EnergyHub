@@ -83,7 +83,7 @@ export default function NotificationDropdown({ className, open = false, animate 
           {unreadCount > 0 && (
             <Badge
               className={cn(
-                "absolute -top-0.5 -right-0.5 flex items-center justify-center p-0 text-xs font-medium border border-background",
+                "absolute -top-0.5 -right-0.5 flex items-center justify-center p-0 text-xs font-medium border border-background bg-red-500 text-white",
                 animate && open
                   ? "h-4 w-4 text-[10px]"  // Sidebar context: smaller badge
                   : "h-5 w-5"  // Floating context: normal size

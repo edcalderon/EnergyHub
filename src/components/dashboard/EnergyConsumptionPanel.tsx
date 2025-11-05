@@ -110,10 +110,11 @@ export default function EnergyConsumptionPanel() {
         value,
         itemStyle: {
           color: mockData.peakHours.includes(index) 
-            ? '#ef4444' 
+            ? '#ff7f0e' 
             : mockData.offPeakHours.includes(index) 
-            ? '#22c55e' 
-            : '#3b82f6'
+            ? '#9ca3b8' 
+            : '#10b981',
+          borderRadius: [4, 4, 0, 0]
         }
       })),
       type: 'bar',
@@ -193,7 +194,8 @@ export default function EnergyConsumptionPanel() {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           { offset: 0, color: '#3b82f6' },
           { offset: 1, color: '#1d4ed8' }
-        ])
+        ]),
+        borderRadius: [4, 4, 0, 0]
       },
       emphasis: {
         itemStyle: {
@@ -389,15 +391,15 @@ export default function EnergyConsumptionPanel() {
               </div>
               <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
                   <span>Horas Pico</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <div className="w-3 h-3 bg-gray-400 rounded"></div>
                   <span>Horas Valle</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
                   <span>Horas Normales</span>
                 </div>
               </div>

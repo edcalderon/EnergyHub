@@ -254,7 +254,7 @@ export default function TariffSimulator() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-foreground">{component.value} COP/kWh</span>
                           {change !== 0 && (
-                            <span className={`text-xs font-semibold ${change < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={`text-xs font-semibold ${change < 0 ? 'text-green-600' : 'text-orange-600'}`}>
                               {change > 0 ? '+' : ''}{change}
                             </span>
                           )}
@@ -280,7 +280,7 @@ export default function TariffSimulator() {
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-foreground">{simulatedTotal} COP/kWh</span>
                   {simulatedTotal !== actualTotal && (
-                    <span className={`text-sm font-semibold ${simulatedTotal < actualTotal ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`text-sm font-semibold ${simulatedTotal < actualTotal ? 'text-green-600' : 'text-orange-600'}`}>
                       ({simulatedTotal < actualTotal ? '-' : '+'}{Math.abs(simulatedTotal - actualTotal)})
                     </span>
                   )}
@@ -291,7 +291,7 @@ export default function TariffSimulator() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-foreground">${formatNumber(simulatedMonthlyCost)} COP</span>
                   {monthlySavings !== 0 && (
-                    <span className={`text-sm font-semibold ${monthlySavings < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`text-sm font-semibold ${monthlySavings < 0 ? 'text-green-600' : 'text-orange-600'}`}>
                       ({monthlySavings < 0 ? 'Ahorro: ' : 'Incremento: '}${formatNumber(Math.abs(monthlySavings))})
                     </span>
                   )}
