@@ -43,16 +43,21 @@ export default function EcoFeedbackPage() {
           </div>
         )}
         <div className="mb-6">
+          {/* SALUDO */}
+          <div className="mb-4">
+            <p className="text-base sm:text-lg font-bold text-neutral-700">
+              ¡Hola, {user?.nombre || "Usuario"}!
+            </p>
+            <p className="text-sm text-neutral-600 mt-1">
+              ¡En Celsia queremos enviarte un saludo cargado de buena energía y decirte que estamos aquí para ti!
+            </p>
+          </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            ¡Hola, {user?.nombre || "Usuario"}!
+            Informe de Energía
           </h1>
-          <p className="text-muted-foreground mb-2">
-            ¡En Celsia queremos enviarte un saludo cargado de buena energía y decirte que estamos aquí para ti!
-          </p>
           <p className="text-muted-foreground mb-4">
             A continuación te mostraremos tu Informe de energía mensual.
           </p>
-          <h2 className="text-xl font-semibold text-foreground">Informe de Energía</h2>
         </div>
 
         <EcoFeedbackSystem />

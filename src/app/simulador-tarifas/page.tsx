@@ -34,16 +34,22 @@ export default function SimuladorTarifasPage() {
   return (
     <div className="min-h-screen bg-background w-full">
       <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
-        {showBackButton && (
-          <div className="mb-4">
-            <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
+        <div className="mb-6">
+          {showBackButton && (
+            <Button variant="ghost" size="sm" className="mb-4" onClick={handleBackToDashboard}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al Dashboard
             </Button>
+          )}
+          {/* SALUDO */}
+          <div className="mb-4">
+            <p className="text-base sm:text-lg font-bold text-neutral-700">
+              ¡Hola, {user?.nombre || "Usuario"}!
+            </p>
+            <p className="text-sm text-neutral-600 mt-1">
+              ¡Te saludamos con la mejor energía de Celsia!
+            </p>
           </div>
-        )}
-        
-        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Simulación de Tarifas Flexibles
           </h1>

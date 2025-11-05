@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.1.2] - 2025-11-05
+### PATCH
+- Mejoras en el sistema EcoFeedback:
+  - Año de comparación ahora visible en la gráfica pero no marcado por defecto
+  - Color del año de comparación cambiado a gris muy claro
+  - Cards de información cambian según el año visualizado (Actual vs Comparación)
+  - Card de variación anual (YoY) movido debajo del card de ecofeedback
+  - Card de variación anual (YoY) solo aparece cuando está seleccionado el año de comparación
+- Mejoras en scroll infinito:
+  - Deshabilitado auto-scroll automático para evitar interferencias
+  - Solo scroll manual del usuario permitido
+  - Botón "back to top" corregido para funcionar correctamente
+  - Scroll circular mejorado para permitir scroll libre hacia arriba y abajo
+- Correcciones de tipos TypeScript:
+  - Agregado tipo `EstadoServicio` para estados de servicio
+  - Corregido tipo `Alert` para incluir propiedad opcional `details`
+- Mejoras en visualización de tarifas:
+  - Texto de tarifas simplificado: "Valle: tarifa más baja", "Tarifa media", "Pico: tarifa más alta"
+- Git commit: 995ce07
+- Build date: 2025-11-05
+
 ## [1.0.8] - 2025-11-05
 ### PATCH
 - Auto-generated release entry

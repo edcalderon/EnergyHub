@@ -8,17 +8,160 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Leaf, DollarSign, MapPin, ArrowRight } from "lucide-react";
+import { Leaf, DollarSign, MapPin, ArrowRight, Download } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function DashboardPage() {
   const { isAuthenticated, user } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/");
     }
   }, [isAuthenticated, router]);
+
+  const handleExportCSV = () => {
+    console.log("handleExportCSV called");
+    try {
+      console.log("User:", user);
+      if (!user) {
+        console.log("No user found");
+        toast({
+          title: "Error",
+          description: "No hay información de usuario disponible",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log("Starting CSV export...");
+
+      // Prepare comprehensive CSV data
+      const csvRows: string[] = [];
+      
+      // Header Section
+      csvRows.push("RESUMEN EJECUTIVO - DATOS DEL USUARIO");
+      csvRows.push("");
+      csvRows.push(`Nombre,${user.nombre || "N/A"}`);
+      csvRows.push(`ID de Contrato,${user.contractId || "N/A"}`);
+      csvRows.push(`Dirección,${user.ubicacion?.address || "N/A"}`);
+      csvRows.push(`Fecha de Exportación,${new Date().toLocaleString("es-CO")}`);
+      csvRows.push("");
+      
+      // Consumption Metrics Section
+      csvRows.push("MÉTRICAS DE CONSUMO");
+      csvRows.push("");
+      csvRows.push("Métrica,Valor,Unidad");
+      csvRows.push(`Consumo Actual,1247,kWh`);
+      csvRows.push(`Consumo Anterior,1156,kWh`);
+      csvRows.push(`Variación,7.9,%`);
+      csvRows.push(`Costo Proyectado,13680000,COP`);
+      csvRows.push(`Eficiencia Energética,87.5,%`);
+      csvRows.push(`Ahorro Mensual,156000,COP`);
+      csvRows.push("");
+      
+      // Monthly Consumption Section
+      csvRows.push("CONSUMO MENSUAL");
+      csvRows.push("");
+      csvRows.push("Mes,Consumo (kWh),Costo (COP)");
+      csvRows.push("Julio,72,1050000");
+      csvRows.push("Agosto,85,1250000");
+      csvRows.push("Septiembre,68,1000000");
+      csvRows.push("Octubre,78,1150000");
+      csvRows.push("Noviembre,82,1200000");
+      csvRows.push("Diciembre,95,1400000");
+      csvRows.push("");
+      
+      // Weekly Consumption Section
+      csvRows.push("CONSUMO SEMANAL");
+      csvRows.push("");
+      csvRows.push("Día,Consumo (kWh),Costo (COP)");
+      csvRows.push("Lunes,85,125000");
+      csvRows.push("Martes,78,115000");
+      csvRows.push("Miércoles,92,135000");
+      csvRows.push("Jueves,88,130000");
+      csvRows.push("Viernes,75,110000");
+      csvRows.push("Sábado,45,66000");
+      csvRows.push("Domingo,38,56000");
+      csvRows.push("");
+      
+      // Hourly Distribution Section
+      csvRows.push("DISTRIBUCIÓN HORARIA");
+      csvRows.push("");
+      csvRows.push("Franja,Porcentaje,Consumo (kWh)");
+      csvRows.push("Valle (Tarifa Baja),45,560");
+      csvRows.push("Tarifa Media,35,437");
+      csvRows.push("Pico (Tarifa Alta),20,250");
+      csvRows.push("");
+      
+      // Environmental Impact Section
+      csvRows.push("IMPACTO AMBIENTAL");
+      csvRows.push("");
+      csvRows.push("Métrica,Valor,Unidad");
+      csvRows.push("CO2 Emitido,2.4,toneladas");
+      csvRows.push("Equivalente en Árboles,112,árboles");
+      csvRows.push("Agua Virtual,1850,litros");
+      csvRows.push("Huella de Carbono,3.2,toneladas CO2");
+      csvRows.push("");
+      
+      // Energy Efficiency Section
+      csvRows.push("EFICIENCIA ENERGÉTICA");
+      csvRows.push("");
+      csvRows.push("Métrica,Valor,Unidad");
+      csvRows.push("Meta de Sostenibilidad,65,%");
+      csvRows.push("Progreso Actual,42,%");
+      csvRows.push("Reducción Horas Pico,15,%");
+      csvRows.push("Incremento Horas Valle,22,%");
+      csvRows.push("");
+      
+      // Join all rows with UTF-8 BOM for Excel compatibility
+      const BOM = "\uFEFF";
+      const csvContent = BOM + csvRows.join("\n");
+      
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      
+      const fileName = `datos_energia_${(user.nombre || "usuario").replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`;
+      
+      link.href = url;
+      link.download = fileName;
+      link.style.display = "none";
+      
+      console.log("Appending link to body, fileName:", fileName);
+      document.body.appendChild(link);
+      console.log("Clicking link...");
+      link.click();
+      console.log("Link clicked");
+      
+      // Clean up
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      // Show toast notification with a small delay to ensure it renders
+      setTimeout(() => {
+        console.log("Showing toast");
+        toast({
+          title: "CSV descargado con éxito!",
+          description: "Los datos se han descargado correctamente en formato CSV",
+        });
+      }, 150);
+    } catch (error) {
+      console.error("Error al exportar CSV:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo exportar el archivo CSV. Por favor, intenta nuevamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!isAuthenticated) {
     return null;
@@ -28,17 +171,28 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-8 pt-4 md:pt-16 w-full max-w-full">
         {/* Hero Section */}
         <div className="mb-8">
-          <div className="mb-4">
-            <h2 className="text-2xl font-semibold text-foreground mb-1">
-              ¡{user?.nombre || "Usuario"} te damos la bienvenida!
-            </h2>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Panel
-            </h1>
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              {/* SALUDO */}
+              <div className="mb-4">
+                <p className="text-base sm:text-lg font-bold text-neutral-700">
+                  ☀️ ¡Hola {user?.nombre || "Usuario"}! Qué alegría tenerte conectado con Celsia.
+                </p>
+                <p className="text-sm text-neutral-600 mt-2">
+                  En cada kilovatio hay una historia de energía que impulsa tu negocio y nos mueve a seguir mejorando cada día. ⚡
+                </p>
+                <p className="text-sm text-neutral-600 mt-1">
+                  Estamos aquí para acompañarte, ayudarte a optimizar tu consumo y brindarte soluciones que hagan tu operación más eficiente y sostenible.
+                </p>
+              </div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Tu Panel De Análisis
+              </h1>
+              <p className="text-muted-foreground">
+                Monitorea tu consumo, recibe alertas inteligentes y optimiza tu gasto energético en tiempo real
+              </p>
+            </div>
           </div>
-          <p className="text-muted-foreground">
-            Monitorea tu consumo, recibe alertas inteligentes y optimiza tu gasto energético en tiempo real
-          </p>
         </div>
 
         {/* Main Grid Layout */}

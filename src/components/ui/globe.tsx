@@ -174,10 +174,8 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
   const isCelsiaMode = theme === 'celsia';
   const isDarkMode = contrastMode === 'dark';
   
-  // Get the appropriate globe image based on theme
-  const globeImage = isCelsiaMode 
-    ? getAssetUrl("/images/earth-celsia.png")
-    : getAssetUrl("/images/globe-light.jpeg");
+  // Use the same globe image for both modes
+  const globeImage = getAssetUrl("/images/globe-light.jpeg");
 
   const nextPattern = () => {
     setCurrentPatternIndex((prev) => (prev + 1) % networkPatterns.length);
@@ -188,7 +186,11 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
   };
 
   // Animación automática de evolución de red - simula el crecimiento orgánico de una red
+  // Solo activa cuando no está en modo Celsia
   useEffect(() => {
+    // No ejecutar animación en modo Celsia
+    if (isCelsiaMode) return;
+    
     let timeoutId: ReturnType<typeof setTimeout>;
     
     const evolveNetwork = () => {
@@ -236,7 +238,7 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, []);
+  }, [isCelsiaMode]);
 
   // Preload earth image for better performance - start loading immediately
   useEffect(() => {
@@ -311,7 +313,8 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
         `}
       </style>
       <div className="flex items-center justify-center h-screen relative">
-        {/* Pattern Selector */}
+        {/* Pattern Selector - Hidden in all modes */}
+        {false && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-background/90 backdrop-blur-md border border-border/60 rounded-lg px-3 py-2 shadow-lg">
           <button
             onClick={prevPattern}
@@ -344,6 +347,7 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         </div>
+        )}
 
         <div
           className="relative w-[250px] h-[250px] rounded-full overflow-visible transition-all duration-500"
@@ -373,8 +377,8 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
               backfaceVisibility: "hidden",
             }}
           />            
-          {/* Dynamic Energy Network Nodes - Only show in Celsia mode */}
-          {isCelsiaMode && (
+          {/* Dynamic Energy Network Nodes - Hidden in all modes */}
+          {false && (
             <div
               key={currentPattern.id}
               className="absolute inset-0"
@@ -441,8 +445,8 @@ const Globe: React.FC<GlobeProps> = ({ contrastMode = 'auto' }) => {
             </div>
           )}
 
-          {/* Dynamic Energy Network Lines - Improved with better curves - Only show in Celsia mode */}
-          {isCelsiaMode && (
+          {/* Dynamic Energy Network Lines - Improved with better curves - Hidden in all modes */}
+          {false && (
           <svg 
             className="absolute inset-0 w-full h-full" 
             style={{ 

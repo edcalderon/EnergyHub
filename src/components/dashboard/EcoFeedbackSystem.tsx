@@ -204,33 +204,33 @@ const calculateMetrics = (data: typeof monthlyConsumptionData, selectedPeriod: P
 
 // Mock data for hourly consumption distribution (24 hours average)
 const hourlyConsumptionData = [
-  // Horas de P baja (valle): 23:00 a 06:00 horas
-  { hour: 23, value: 150, zone: 'valle' },
-  { hour: 0, value: 120, zone: 'valle' },
-  { hour: 1, value: 100, zone: 'valle' },
-  { hour: 2, value: 95, zone: 'valle' },
-  { hour: 3, value: 90, zone: 'valle' },
-  { hour: 4, value: 110, zone: 'valle' },
-  { hour: 5, value: 130, zone: 'valle' },
+  // Horas de tarifa baja (valle): 00:00 a 05:00 horas
+  { hour: 0, value: 120, zone: 'fuera_pico' },
+  { hour: 1, value: 100, zone: 'fuera_pico' },
+  { hour: 2, value: 95, zone: 'fuera_pico' },
+  { hour: 3, value: 90, zone: 'fuera_pico' },
+  { hour: 4, value: 110, zone: 'fuera_pico' },
+  { hour: 5, value: 130, zone: 'fuera_pico' },
+  // Horas de P baja (valle): 06:00 a 18:00 horas
   { hour: 6, value: 180, zone: 'valle' },
-  // Horas de P media: 07:00 a 17:00 horas
-  { hour: 7, value: 250, zone: 'fuera_pico' },
-  { hour: 8, value: 320, zone: 'fuera_pico' },
-  { hour: 9, value: 380, zone: 'fuera_pico' },
-  { hour: 10, value: 420, zone: 'fuera_pico' },
-  { hour: 11, value: 450, zone: 'fuera_pico' },
-  { hour: 12, value: 480, zone: 'fuera_pico' },
-  { hour: 13, value: 460, zone: 'fuera_pico' },
-  { hour: 14, value: 440, zone: 'fuera_pico' },
-  { hour: 15, value: 420, zone: 'fuera_pico' },
-  { hour: 16, value: 400, zone: 'fuera_pico' },
-  { hour: 17, value: 450, zone: 'fuera_pico' },
-  // Horas de P alta (pico): 18:00 a 22:00 horas
-  { hour: 18, value: 500, zone: 'pico' },
+  { hour: 7, value: 250, zone: 'valle' },
+  { hour: 8, value: 320, zone: 'valle' },
+  { hour: 9, value: 380, zone: 'valle' },
+  { hour: 10, value: 420, zone: 'valle' },
+  { hour: 11, value: 450, zone: 'valle' },
+  { hour: 12, value: 480, zone: 'valle' },
+  { hour: 13, value: 460, zone: 'valle' },
+  { hour: 14, value: 440, zone: 'valle' },
+  { hour: 15, value: 420, zone: 'valle' },
+  { hour: 16, value: 400, zone: 'valle' },
+  { hour: 17, value: 450, zone: 'valle' },
+  { hour: 18, value: 500, zone: 'valle' },
+  // Horas de P alta (pico): 19:00 a 23:00 horas
   { hour: 19, value: 480, zone: 'pico' },
   { hour: 20, value: 350, zone: 'pico' },
   { hour: 21, value: 280, zone: 'pico' },
   { hour: 22, value: 200, zone: 'pico' },
+  { hour: 23, value: 150, zone: 'pico' },
 ];
 
 // Calculate hourly distribution percentages
@@ -424,6 +424,8 @@ export default function EcoFeedbackSystem() {
   const { toast } = useToast();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('3M');
   const [selectedYear, setSelectedYear] = useState<YearType>('1er');
+  const [showComparison, setShowComparison] = useState(false); // Default to false - only show current year
+  const [viewingYear, setViewingYear] = useState<'actual' | 'comparacion'>('actual'); // Qué año se está visualizando en los cards
   const [distributionPeriod, setDistributionPeriod] = useState<DistributionPeriodType>('mes');
   const [savingsChartType, setSavingsChartType] = useState<'gauge' | 'bar'>('gauge');
   const [savingsDisplayType, setSavingsDisplayType] = useState<'percentage' | 'kwh'>('percentage');
@@ -435,10 +437,11 @@ export default function EcoFeedbackSystem() {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const autoScrollIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const isScrollingRef = React.useRef(false);
+  const isUserInteractingRef = React.useRef(false);
   const lastScrollTopRef = React.useRef(0);
-  const lastScrollTimeRef = React.useRef(Date.now() - 3000); // Initialize to 3 seconds ago to allow auto-scroll
+  const lastInteractionTimeRef = React.useRef(0);
   const scrollDirectionRef = React.useRef<'down' | 'up'>('down'); // Track scroll direction
+  const isAutoScrollingRef = React.useRef(false); // Track if we're currently auto-scrolling
   
   // Format number helper function
   const formatNumber = (num: number) => {
@@ -456,9 +459,66 @@ export default function EcoFeedbackSystem() {
       return;
     }
     setSelectedYear(year);
+    // Don't automatically show comparison - user needs to click on legend or toggle
+    // setShowComparison(true);
   };
   
+  // Get comparison year data based on selectedYear (moved before metrics calculation)
+  const getComparisonYearData = () => {
+    const monthsOffset = selectedYear === '1er' ? 12 : selectedYear === '2do' ? 24 : 36;
+    if (monthlyConsumptionData.length < monthsOffset + 12) {
+      return null;
+    }
+    return monthlyConsumptionData.slice(-monthsOffset - 12, -monthsOffset);
+  };
+  
+  const comparisonYearData = getComparisonYearData();
+  
   const metrics = useMemo(() => calculateMetrics(monthlyConsumptionData, selectedPeriod, selectedYear), [selectedPeriod, selectedYear]);
+  
+  // Calcular métricas para el año de comparación
+  const comparisonMetrics = useMemo(() => {
+    if (!comparisonYearData || comparisonYearData.length === 0) {
+      return null;
+    }
+    // Calcular métricas directamente usando los datos del año de comparación
+    const comparisonMonth = comparisonYearData[comparisonYearData.length - 1];
+    const comparisonPreviousMonth = comparisonYearData.length > 1 ? comparisonYearData[comparisonYearData.length - 2] : null;
+    
+    const avgComparisonYear = comparisonYearData.reduce((sum, item) => sum + item.value, 0) / comparisonYearData.length;
+    
+    const maxMonth = comparisonYearData.reduce((max, item) => item.value > max.value ? item : max, comparisonYearData[0]);
+    const minMonth = comparisonYearData.reduce((min, item) => item.value < min.value ? item : min, comparisonYearData[0]);
+    
+    const vsPreviousMonth = comparisonPreviousMonth 
+      ? ((comparisonMonth.value - comparisonPreviousMonth.value) / comparisonPreviousMonth.value) * 100 
+      : 0;
+    
+    // Para el period trend, usar los datos de comparación
+    const periodTrend = calculatePeriodTrend(comparisonYearData, selectedPeriod);
+    
+    return {
+      currentMonth: comparisonMonth.value,
+      currentMonthName: comparisonMonth.month,
+      avgLast12Months: avgComparisonYear,
+      maxMonth,
+      minMonth,
+      vsPreviousMonth,
+      periodTrend,
+      yoyVariation: 0, // No aplicable para año de comparación
+      sameMonthLastYear: null,
+      yoyYearLabel: metrics.yoyYearLabel,
+      accumulatedSavings: 0,
+      accumulatedSavingsKWh: 0,
+      vsHistoricalAverage: 0,
+      currentYearTotal: comparisonYearData.reduce((sum, item) => sum + item.value, 0),
+      previousYearTotal: 0
+    };
+  }, [comparisonYearData, selectedPeriod, metrics.yoyYearLabel]);
+  
+  // Métricas a mostrar según el año seleccionado
+  const displayMetrics = viewingYear === 'comparacion' && comparisonMetrics ? comparisonMetrics : metrics;
+  
   const hourlyDistribution = useMemo(() => calculateHourlyDistribution(distributionPeriod), [distributionPeriod]);
   
   const ecoFeedbackMessages = useMemo(() => generateEcoFeedbackMessages(metrics, hourlyDistribution), [metrics, hourlyDistribution]);
@@ -516,7 +576,7 @@ export default function EcoFeedbackSystem() {
     ];
   }, [metrics.accumulatedSavingsKWh, formatNumber]);
   
-  // Infinite circular scroll animation
+  // Initialize scroll position - only manual scroll, no auto-scroll
   useEffect(() => {
     if (!scrollContainerRef.current || environmentalImpacts.length === 0) return;
     
@@ -530,136 +590,74 @@ export default function EcoFeedbackSystem() {
       lastScrollTopRef.current = startOffset;
     }
     
-    // Reset scrolling state on mount
-    isScrollingRef.current = false;
-    lastScrollTimeRef.current = Date.now() - 3000; // Allow auto-scroll to start immediately
-    scrollDirectionRef.current = 'down'; // Start scrolling down
+    // Clear any existing auto-scroll interval
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+      autoScrollIntervalRef.current = null;
+    }
     
-    // Auto-scroll continuously with bounce effect
-    const scroll = () => {
-      if (!scrollContainerRef.current) return;
-      
-      const now = Date.now();
-      const timeSinceLastManualScroll = now - lastScrollTimeRef.current;
-      
-      // Pause auto-scroll only if user scrolled manually within the last 2 seconds
-      if (isScrollingRef.current && timeSinceLastManualScroll < 2000) {
-        return;
-      }
-      
-      // Reset scrolling flag if enough time has passed
-      if (timeSinceLastManualScroll >= 2000) {
-        isScrollingRef.current = false;
-      }
-      
-      const currentScroll = scrollContainerRef.current.scrollTop;
-      const maxScroll = totalHeight * 2;
-      const minScroll = totalHeight; // Start of middle section
-      
-      // Change direction when reaching boundaries - check BEFORE scrolling
-      if (scrollDirectionRef.current === 'down' && currentScroll >= maxScroll - 2) {
-        // Reached bottom, change direction to up
-        scrollDirectionRef.current = 'up';
-      } else if (scrollDirectionRef.current === 'up' && currentScroll <= minScroll + 1) {
-        // Reached top, change direction to down
-        scrollDirectionRef.current = 'down';
-      }
-      
-      // Scroll based on current direction
-      if (scrollDirectionRef.current === 'down') {
-        const newScroll = Math.min(currentScroll + 1, maxScroll - 1);
-        scrollContainerRef.current.scrollTop = newScroll;
-        lastScrollTopRef.current = newScroll;
-      } else {
-        const newScroll = Math.max(currentScroll - 1, minScroll + 1);
-        scrollContainerRef.current.scrollTop = newScroll;
-        lastScrollTopRef.current = newScroll;
-      }
-    };
-    
-    // Start auto-scroll after a short delay to ensure initialization
-    setTimeout(() => {
-      autoScrollIntervalRef.current = setInterval(scroll, 30); // Smooth scroll every 30ms
-    }, 500);
+    // Disable auto-scroll completely - only manual scroll
+    isAutoScrollingRef.current = false;
+    isUserInteractingRef.current = false;
     
     return () => {
       if (autoScrollIntervalRef.current) {
         clearInterval(autoScrollIntervalRef.current);
+        autoScrollIntervalRef.current = null;
       }
     };
   }, [environmentalImpacts.length]);
   
-  // Handle manual scroll - make it circular
+  // Handle manual scroll - make it circular (no auto-scroll interference)
   const handleScroll = () => {
     if (!scrollContainerRef.current || environmentalImpacts.length === 0) return;
     
     const currentScrollTop = scrollContainerRef.current.scrollTop;
-    const lastScrollTop = lastScrollTopRef.current;
     
     // Show/hide back to top button based on scroll position
     const cardHeight = 92;
     const totalHeight = cardHeight * environmentalImpacts.length;
     const minScroll = totalHeight;
-    // Show button when scrolled down more than 100px from the start
+    // Show button when scrolled down more than 100px from the start of middle section
     setShowBackToTop(currentScrollTop > minScroll + 100);
-    
-    // Calculate scroll difference
-    const scrollDifference = Math.abs(currentScrollTop - lastScrollTop);
-    
-    // Detect if user is manually scrolling (any change > 1px is considered manual)
-    // Auto-scroll only moves 1px at a time, so any larger change is user interaction
-    if (scrollDifference > 1.5) {
-      // User is actively scrolling - pause auto-scroll immediately
-      isScrollingRef.current = true;
-      lastScrollTimeRef.current = Date.now();
-      
-      // Update direction based on user's scroll direction
-      if (currentScrollTop > lastScrollTop) {
-        scrollDirectionRef.current = 'down';
-      } else if (currentScrollTop < lastScrollTop) {
-        scrollDirectionRef.current = 'up';
-      }
-    }
-    
-    // Update last scroll position AFTER checking for manual scroll
-    lastScrollTopRef.current = currentScrollTop;
     
     const maxScroll = totalHeight * 2;
     
-    // Handle circular scroll boundaries for manual scroll
+    // Handle circular scroll boundaries - only jump when reaching absolute boundaries
+    // Allow normal scrolling in between boundaries
     // If scrolled to or past the end of duplicated section, jump to start of middle section
     if (currentScrollTop >= maxScroll - 1) {
-      scrollContainerRef.current.scrollTop = totalHeight;
-      lastScrollTopRef.current = totalHeight;
+      // Use requestAnimationFrame to avoid interrupting user scroll
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current && scrollContainerRef.current.scrollTop >= maxScroll - 1) {
+          scrollContainerRef.current.scrollTop = totalHeight;
+          lastScrollTopRef.current = totalHeight;
+        }
+      });
     }
-    // If scrolled before the start of duplicated section, jump to end of middle section
-    else if (currentScrollTop < totalHeight) {
-      scrollContainerRef.current.scrollTop = maxScroll - cardHeight;
-      lastScrollTopRef.current = maxScroll - cardHeight;
+    // Only jump if we're at the very top (0 or less) to allow normal scroll up within the middle section
+    else if (currentScrollTop <= 0) {
+      // Jump to end of middle section only when at the absolute top
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current && scrollContainerRef.current.scrollTop <= 0) {
+          scrollContainerRef.current.scrollTop = maxScroll - cardHeight;
+          lastScrollTopRef.current = maxScroll - cardHeight;
+        }
+      });
+    } else {
+      // Update last scroll position for normal scrolling
+      lastScrollTopRef.current = currentScrollTop;
     }
-    
-    // Resume auto-scroll after user stops scrolling (3 seconds of inactivity)
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    scrollTimeoutRef.current = setTimeout(() => {
-      isScrollingRef.current = false;
-      // Resume auto-scroll from current position
-    }, 3000);
   };
   
-  // Scroll to middle of the section (start of original cards)
+  // Scroll to top of the section (start of original cards in middle section)
   const scrollToTop = () => {
     if (!scrollContainerRef.current || environmentalImpacts.length === 0) return;
     
     const cardHeight = 92;
     const totalHeight = cardHeight * environmentalImpacts.length;
-    // Scroll to the middle section (where original cards start)
+    // Scroll to the middle section (where original cards start) - this is the "top" for the user
     const middlePosition = totalHeight;
-    
-    // Pause auto-scroll temporarily
-    isScrollingRef.current = true;
-    lastScrollTimeRef.current = Date.now();
     
     // Scroll to middle section (start of original cards)
     scrollContainerRef.current.scrollTo({
@@ -667,16 +665,12 @@ export default function EcoFeedbackSystem() {
       behavior: 'smooth'
     });
     
-    // Update last scroll position
-    lastScrollTopRef.current = middlePosition;
-    
-    // Reset direction to down
-    scrollDirectionRef.current = 'down';
-    
-    // Resume auto-scroll after animation
+    // Update last scroll position after animation
     setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 1500);
+      if (scrollContainerRef.current) {
+        lastScrollTopRef.current = scrollContainerRef.current.scrollTop;
+      }
+    }, 100);
   };
   
   // Scroll to specific card index (anchor point)
@@ -695,18 +689,13 @@ export default function EcoFeedbackSystem() {
       targetScroll = totalHeight * 2 + (cardIndex * cardHeight);
     }
     
-    // Temporarily pause auto-scroll
-    isScrollingRef.current = true;
-    
     scrollContainerRef.current.scrollTo({
       top: targetScroll,
       behavior: 'smooth'
     });
     
-    // Resume auto-scroll after animation
-    setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 1000);
+    // Update last scroll position
+    lastScrollTopRef.current = targetScroll;
   };
   
   // Calculate savings trend for last 6 months
@@ -1106,7 +1095,7 @@ export default function EcoFeedbackSystem() {
           const data = params[0];
           const hour = parseInt(data.axisValue.split(':')[0]);
           const hourData = hourlyData.find((h: any) => h.hour === hour);
-          const zoneName = hourData?.zone === 'valle' ? 'Valle: tarifa más baja' : hourData?.zone === 'fuera_pico' ? 'P media' : 'Pico: tarifa más alta';
+          const zoneName = hourData?.zone === 'valle' ? 'Valle: tarifa más baja' : hourData?.zone === 'fuera_pico' ? 'Tarifa media' : 'Pico: tarifa más alta';
           return `${data.axisValue}<br/>Consumo: ${data.value} kWh<br/>Franja: ${zoneName}`;
         }
       },
@@ -1179,18 +1168,9 @@ export default function EcoFeedbackSystem() {
   
   // Get last 12 months for current year
   const last12Months = monthlyConsumptionData.slice(-12);
-  
-  // Get comparison year data based on selectedYear
-  const getComparisonYearData = () => {
-    const monthsOffset = selectedYear === '1er' ? 12 : selectedYear === '2do' ? 24 : 36;
-    if (monthlyConsumptionData.length < monthsOffset + 12) {
-      return null;
-    }
-    return monthlyConsumptionData.slice(-monthsOffset - 12, -monthsOffset);
-  };
-  
-  const comparisonYearData = getComparisonYearData();
-  const showComparison = comparisonYearData !== null;
+  // showComparison is now controlled by state, defaulting to false
+  // Only show comparison if user has selected a year AND comparison data exists
+  const actualShowComparison = showComparison && comparisonYearData !== null;
   
   // Find the 3 highest and 3 lowest months
   const sortedMonths = [...last12Months].sort((a, b) => b.value - a.value);
@@ -1225,7 +1205,7 @@ export default function EcoFeedbackSystem() {
     ? comparisonYearData.map((item) => ({
         value: item.value,
         itemStyle: {
-          color: '#94a3b8' // Gray color for comparison year
+          color: '#d1d5db' // Gris muy claro para el año de comparación
         }
       }))
     : [];
@@ -1269,17 +1249,32 @@ export default function EcoFeedbackSystem() {
       }
     },
     legend: {
-      data: showComparison ? ['Año Actual', 'Año Comparación'] : ['Año Actual'],
+      data: comparisonYearData ? ['Año Actual', 'Año Comparación'] : ['Año Actual'],
       top: 10,
+      selected: {
+        'Año Actual': true,
+        'Año Comparación': false // Siempre aparece en la leyenda pero no está marcado inicialmente
+      },
       textStyle: {
         color: theme === 'dark' ? '#9ca3af' : '#6b7280'
-      }
+      },
+      selectedMode: true,
+      selector: comparisonYearData ? [
+        {
+          type: 'all',
+          title: 'Todo'
+        },
+        {
+          type: 'inverse',
+          title: 'Invertir'
+        }
+      ] : undefined
     },
     grid: {
       left: '3%',
       right: '4%',
       bottom: '15%',
-      top: showComparison ? '18%' : '10%',
+      top: comparisonYearData ? '18%' : '10%', // Ajustar espacio superior si hay datos de comparación disponibles
       containLabel: true
     },
     xAxis: {
@@ -1322,7 +1317,7 @@ export default function EcoFeedbackSystem() {
         name: 'Año Actual',
         data: currentYearData,
         type: 'bar',
-        barWidth: showComparison ? '35%' : '60%',
+        barWidth: comparisonYearData ? '35%' : '60%', // Ajustar ancho basado en si hay datos de comparación disponibles
         itemStyle: {
           borderRadius: [4, 4, 0, 0]
         },
@@ -1335,7 +1330,8 @@ export default function EcoFeedbackSystem() {
           }
         }
       },
-      ...(showComparison ? [{
+      // Siempre incluir la serie de comparación si hay datos disponibles, pero controlada por la leyenda
+      ...(comparisonYearData ? [{
         name: 'Año Comparación',
         data: comparisonData,
         type: 'bar',
@@ -1354,7 +1350,33 @@ export default function EcoFeedbackSystem() {
         }
       }] : [])
     ]
-  }), [currentYearData, comparisonData, last12Months, showComparison, theme, metrics.yoyYearLabel]);
+  }), [currentYearData, comparisonData, last12Months, comparisonYearData, theme, metrics.yoyYearLabel]);
+  
+  // Handler para cuando se hace clic en la leyenda del gráfico
+  const handleLegendSelect = (params: any) => {
+    if (params && params.selected) {
+      const isComparisonSelected = params.selected['Año Comparación'];
+      const isActualSelected = params.selected['Año Actual'];
+      
+      // Si se selecciona el año de comparación, cambiar a ver ese año en los cards
+      if (isComparisonSelected && comparisonYearData) {
+        setViewingYear('comparacion');
+        setShowComparison(true);
+      } else if (isActualSelected && !isComparisonSelected) {
+        // Si solo está seleccionado el año actual, mostrar ese año
+        setViewingYear('actual');
+      }
+    }
+  };
+  
+  // Agregar el evento al chartOption
+  const chartOptionWithEvents = useMemo(() => ({
+    ...chartOption,
+    legend: {
+      ...chartOption.legend,
+      // Esto se manejará con el evento onEvents del componente ReactECharts
+    }
+  }), [chartOption]);
 
   const handleDownloadPDF = () => {
     const ecoData: EcoFeedbackData = {
@@ -1407,42 +1429,16 @@ export default function EcoFeedbackSystem() {
             <span className="text-sm font-medium text-foreground">Estado:</span>
             <span className="text-sm text-muted-foreground">Tendencia de consumo a la baja.</span>
           </div>
-          <div className="flex items-center gap-3">
-            {/* YoY Indicator */}
-            {metrics.yoyVariation < 0 && metrics.sameMonthLastYear && (
-              <Card className="px-4 py-2 bg-green-50 border-green-200">
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-green-700">
-                      Comparado con el mismo mes del año pasado {Math.abs(Math.round(metrics.yoyVariation))}%
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            )}
-            {/* Vs mes anterior Indicator */}
-            {metrics.vsPreviousMonth < 0 && (
-              <Card className="px-4 py-2 bg-green-50 border-green-200">
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-green-700">
-                      {Math.abs(Math.round(metrics.vsPreviousMonth))}% vs el mes anterior
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            )}
-          </div>
         </div>
 
         {/* Monthly Consumption Chart */}
         <Card className="p-6">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Consumo mensual por categoría
-            </h3>
+              <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-foreground">
+                Consumo mensual por categoría
+              </h3>
+            </div>
             <p className="text-sm text-muted-foreground mb-4">
               Identifica meses de alto consumo y ahorro frente al promedio anual.
             </p>
@@ -1468,32 +1464,63 @@ export default function EcoFeedbackSystem() {
             {/* Chart - Left side, takes more space */}
             <div className="flex-1 min-w-0">
               <div className="bg-muted/30 rounded-lg p-4 relative">
-                <ReactECharts option={chartOption} style={{ height: '350px', width: '100%' }} />
+                <ReactECharts 
+                  option={chartOption} 
+                  style={{ height: '350px', width: '100%' }}
+                  onEvents={{
+                    legendselectchanged: handleLegendSelect
+                  }}
+                />
                 
                 {/* Dropdown controls positioned at bottom of chart */}
-                <div className="absolute bottom-4 right-4 flex gap-2 z-10">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 text-xs bg-background/80 backdrop-blur-sm">
-                        Comparar con: {selectedYear === '1er' ? '1er año' : selectedYear === '2do' ? '2do año' : '3er año'}
-                        <ChevronDown className="h-3 w-3 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuRadioGroup value={selectedYear} onValueChange={(value) => handleYearChange(value as YearType)}>
-                        <DropdownMenuRadioItem value="1er" disabled={false}>
-                          1er año
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="2do" disabled={false}>
-                          2do año
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="3er" disabled={monthlyConsumptionData.length < 37}>
-                          3er año
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  
+                <div className="absolute bottom-4 right-4 flex items-center gap-3 z-10">
+                  <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded border">
+                    <span className="text-xs font-medium text-foreground">Año Actual</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded border">
+                    <Switch
+                      checked={showComparison}
+                      onCheckedChange={(checked) => {
+                        setShowComparison(checked);
+                        if (checked && comparisonYearData) {
+                          setViewingYear('comparacion');
+                        } else {
+                          setViewingYear('actual');
+                        }
+                      }}
+                      disabled={!comparisonYearData}
+                    />
+                    <span className="text-xs font-medium text-foreground">Año de Comparación</span>
+                  </div>
+                  {showComparison && comparisonYearData && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 text-xs bg-background/80 backdrop-blur-sm">
+                          {selectedYear === '1er' ? '1er año' : selectedYear === '2do' ? '2do año' : '3er año'}
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuRadioGroup value={selectedYear} onValueChange={(value) => {
+                          handleYearChange(value as YearType);
+                          // Si estamos viendo el año de comparación, mantener esa vista
+                          if (viewingYear === 'comparacion') {
+                            setViewingYear('comparacion');
+                          }
+                        }}>
+                          <DropdownMenuRadioItem value="1er" disabled={false}>
+                            1er año
+                          </DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="2do" disabled={false}>
+                            2do año
+                          </DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="3er" disabled={monthlyConsumptionData.length < 37}>
+                            3er año
+                          </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="h-8 text-xs bg-background/80 backdrop-blur-sm">
@@ -1520,44 +1547,210 @@ export default function EcoFeedbackSystem() {
               {/* Average and explanation */}
               <div className="mt-4 px-2">
                 <p className="text-sm font-medium text-foreground">
-                  Promedio anual: {formatNumber(Math.round(metrics.avgLast12Months))} kWh
+                  Promedio anual: {formatNumber(Math.round(displayMetrics.avgLast12Months))} kWh
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Los tres meses con mayor consumo se muestran en naranja y los de menor consumo en verde.
                 </p>
               </div>
+              
+              {/* EcoFeedback Message - Debajo del promedio anual */}
+              {metrics.yoyVariation < 0 && metrics.sameMonthLastYear && (
+                <Card className="mt-4 p-4 bg-green-50 border-green-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-green-100 flex-shrink-0">
+                      <Leaf className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-green-800 mb-1">
+                        Este mes consumiste {formatNumber(metrics.currentMonth)} kWh, un {Math.abs(Math.round(metrics.yoyVariation))}% menos que el mismo mes del año pasado.
+                      </p>
+                      <p className="text-sm font-semibold text-green-800">
+                        ¡Has reducido tu consumo en {Math.abs(Math.round(metrics.accumulatedSavings || metrics.yoyVariation))}% y mejorado tu eficiencia!
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+              
+              {/* Variación anual (YoY) - Debajo del card verde de ecofeedback - Solo cuando está seleccionado año de comparación */}
+              {actualShowComparison && metrics.sameMonthLastYear && (
+                <Card className={`mt-4 p-4 ${metrics.yoyVariation < 0 ? 'bg-green-50 border-green-200' : metrics.yoyVariation > 0 ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800 mb-1">Variación anual (YoY)</p>
+                        <p className="text-xs text-gray-600">
+                          Compara el consumo del mes actual ({metrics.currentMonthName}) con el mismo mes del {metrics.yoyYearLabel} ({metrics.sameMonthLastYear.month})
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {metrics.yoyVariation < 0 ? (
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
+                          <TrendingDown className="h-5 w-5 text-green-600" />
+                        </div>
+                      ) : metrics.yoyVariation > 0 ? (
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100">
+                          <TrendingUp className="h-5 w-5 text-orange-600" />
+                        </div>
+                      ) : null}
+                      <div>
+                        <span className={`text-2xl font-bold ${metrics.yoyVariation < 0 ? 'text-green-600' : metrics.yoyVariation > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
+                          {metrics.yoyVariation < 0 ? '↓' : metrics.yoyVariation > 0 ? '↑' : ''}{Math.abs(Math.round(metrics.yoyVariation))}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
+                      <span className="font-medium">{metrics.currentMonthName}:</span> {formatNumber(metrics.currentMonth)} kWh • 
+                      <span className="font-medium ml-1">{metrics.sameMonthLastYear.month}:</span> {formatNumber(metrics.sameMonthLastYear.value)} kWh
+                    </div>
+                  </div>
+                </Card>
+              )}
             </div>
             
             {/* Right side: Cards in two columns */}
             <div className="flex flex-col gap-4 xl:w-[420px] xl:flex-shrink-0">
+              {/* Indicador de año visualizado */}
+              {comparisonYearData && (
+                <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-muted/50 rounded-lg border border-border">
+                  <div className="flex items-center gap-2 flex-1">
+                    <button
+                      onClick={() => setViewingYear('actual')}
+                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
+                        viewingYear === 'actual'
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-background text-muted-foreground hover:bg-muted'
+                      }`}
+                    >
+                      Año Actual
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewingYear('comparacion');
+                        setShowComparison(true);
+                      }}
+                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
+                        viewingYear === 'comparacion'
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-background text-muted-foreground hover:bg-muted'
+                      }`}
+                    >
+                      Año de Comparación
+                    </button>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {viewingYear === 'actual' ? 'Viendo datos actuales' : `Viendo ${metrics.yoyYearLabel}`}
+                  </span>
+                </div>
+              )}
+              
+              {/* Green Comparison Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* Vs el mes anterior */}
+                <Card className="p-5 bg-green-50 border-green-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800 mb-1">Vs el mes anterior</p>
+                        <p className="text-xs text-gray-600">Comparativo mensual</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
+                        <TrendingDown className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <span className="text-2xl font-bold text-green-600">{Math.abs(Math.round(displayMetrics.vsPreviousMonth))}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Evolución reciente */}
+                <Card className="p-5 bg-green-50 border-green-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800">Evolución reciente</p>
+                      </div>
+                      <div className="flex gap-1 ml-2 flex-shrink-0">
+                        <button
+                          onClick={() => setSelectedPeriod('3M')}
+                          className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-all ${
+                            selectedPeriod === '3M'
+                              ? 'bg-orange-500 text-white shadow-sm'
+                              : 'bg-white text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          3M
+                        </button>
+                        <button
+                          onClick={() => setSelectedPeriod('6M')}
+                          className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-all ${
+                            selectedPeriod === '6M'
+                              ? 'bg-orange-500 text-white shadow-sm'
+                              : 'bg-white text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          6M
+                        </button>
+                        <button
+                          onClick={() => setSelectedPeriod('1A')}
+                          className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-all ${
+                            selectedPeriod === '1A'
+                              ? 'bg-orange-500 text-white shadow-sm'
+                              : 'bg-white text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          1A
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Consumo promedio de los últimos {selectedPeriod === '3M' ? '3 meses' : selectedPeriod === '6M' ? '6 meses' : '12 meses'} bajó
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
+                        <TrendingDown className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <span className="text-2xl font-bold text-green-600">{Math.abs(Math.round(displayMetrics.periodTrend.trend))}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
               {/* Indicators Cards - Two columns, better spacing */}
               <div className="grid grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
                 {/* Consumo mes actual */}
                 <Card className="p-3 bg-orange-50 border-orange-100">
                   <p className="text-[10px] font-semibold text-orange-600 mb-1 uppercase tracking-wide">Consumo del mes</p>
-                  <p className="text-xl font-bold text-orange-600">{formatNumber(metrics.currentMonth)} kWh</p>
+                  <p className="text-xl font-bold text-orange-600">{formatNumber(displayMetrics.currentMonth)} kWh</p>
                   <p className="text-[10px] text-muted-foreground mt-1">↓ 6% vs dic. pasado</p>
                 </Card>
                 
                 {/* Promedio últimos 12 meses */}
                 <Card className="p-3 bg-orange-50 border-orange-100">
                   <p className="text-[10px] font-semibold text-orange-600 mb-1 uppercase tracking-wide">Promedio 12 meses</p>
-                  <p className="text-xl font-bold text-orange-600">{formatNumber(metrics.avgLast12Months)} kWh/mes</p>
+                  <p className="text-xl font-bold text-orange-600">{formatNumber(displayMetrics.avgLast12Months)} kWh/mes</p>
                   <p className="text-[10px] text-muted-foreground mt-1">tendencia 3M a la baja</p>
                 </Card>
                 
                 {/* Mayor consumo histórico */}
                 <Card className="p-3 bg-orange-50 border-orange-100">
                   <p className="text-[10px] font-semibold text-orange-600 mb-1 uppercase tracking-wide">Mayor consumo histórico</p>
-                  <p className="text-xl font-bold text-orange-600">{formatNumber(metrics.maxMonth.value)} kWh</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{metrics.maxMonth.month}</p>
+                  <p className="text-xl font-bold text-orange-600">{formatNumber(displayMetrics.maxMonth.value)} kWh</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{displayMetrics.maxMonth.month}</p>
                 </Card>
                 
                 {/* Menor consumo histórico */}
                 <Card className="p-3 bg-orange-50 border-orange-100">
                   <p className="text-[10px] font-semibold text-orange-600 mb-1 uppercase tracking-wide">Menor consumo histórico</p>
-                  <p className="text-xl font-bold text-orange-600">{formatNumber(metrics.minMonth.value)} kWh</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{metrics.minMonth.month}</p>
+                  <p className="text-xl font-bold text-orange-600">{formatNumber(displayMetrics.minMonth.value)} kWh</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{displayMetrics.minMonth.month}</p>
                 </Card>
                 
                 {/* Uso en horas pico */}
@@ -1594,49 +1787,6 @@ export default function EcoFeedbackSystem() {
               </div>
             </div>
           </div>
-          
-          {/* EcoFeedback Message */}
-          {metrics.yoyVariation < 0 && metrics.sameMonthLastYear && (
-            <Card className="mt-4 p-6 bg-green-50 border-green-200">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-green-100">
-                  <Leaf className="h-6 w-6 text-green-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-base font-semibold text-green-800 mb-2">
-                    Este mes consumiste {formatNumber(metrics.currentMonth)} kWh, un {Math.abs(Math.round(metrics.yoyVariation))}% menos que el mismo mes del año pasado.
-                  </p>
-                  <p className="text-base font-semibold text-green-800">
-                    ¡Has reducido tu consumo en {Math.abs(Math.round(metrics.accumulatedSavings || metrics.yoyVariation))}% y mejorado tu eficiencia!
-                  </p>
-                </div>
-              </div>
-            </Card>
-          )}
-          
-          {/* Variación anual (YoY) - Ocupa toda la fila */}
-          {showComparison && metrics.sameMonthLastYear && (
-            <Card className={`p-4 mt-4 ${metrics.yoyVariation < 0 ? 'bg-green-50 border-green-100' : metrics.yoyVariation > 0 ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100'}`}>
-              <p className="text-xs text-muted-foreground mb-1">Variación anual (YoY)</p>
-              <p className="text-xs text-muted-foreground mb-1">
-                Compara el consumo del mes actual ({metrics.currentMonthName}) con el mismo mes del {metrics.yoyYearLabel} ({metrics.sameMonthLastYear.month})
-              </p>
-              <div className="flex items-center gap-2">
-                {metrics.yoyVariation < 0 ? (
-                  <TrendingDown className="h-5 w-5 text-green-600" />
-                ) : metrics.yoyVariation > 0 ? (
-                  <TrendingUp className="h-5 w-5 text-orange-600" />
-                ) : null}
-                <p className={`text-2xl font-bold ${metrics.yoyVariation < 0 ? 'text-green-600' : metrics.yoyVariation > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
-                  {metrics.yoyVariation < 0 ? '↓' : metrics.yoyVariation > 0 ? '↑' : ''}{Math.abs(Math.round(metrics.yoyVariation))}%
-                </p>
-              </div>
-              <div className="mt-2 text-xs text-muted-foreground">
-                <span className="font-medium">{metrics.currentMonthName}:</span> {formatNumber(metrics.currentMonth)} kWh • 
-                <span className="font-medium ml-1">{metrics.sameMonthLastYear.month}:</span> {formatNumber(metrics.sameMonthLastYear.value)} kWh
-              </div>
-            </Card>
-          )}
         </Card>
 
         {/* Gadget 2: Ahorro Acumulado y Gadget 3: Distribución del Consumo */}
@@ -1791,21 +1941,6 @@ export default function EcoFeedbackSystem() {
                 ref={scrollContainerRef}
                 className="relative h-[280px] w-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
                 onScroll={handleScroll}
-                onWheel={() => {
-                  // User is using mouse wheel - pause auto-scroll
-                  isScrollingRef.current = true;
-                  lastScrollTimeRef.current = Date.now();
-                }}
-                onTouchStart={() => {
-                  // User is touching/scrolling on mobile - pause auto-scroll
-                  isScrollingRef.current = true;
-                  lastScrollTimeRef.current = Date.now();
-                }}
-                onMouseDown={() => {
-                  // User is clicking/dragging scrollbar - pause auto-scroll
-                  isScrollingRef.current = true;
-                  lastScrollTimeRef.current = Date.now();
-                }}
               >
               <div className="flex flex-col gap-3 w-full">
                 {/* Duplicate cards at the beginning for seamless loop */}
@@ -2059,8 +2194,8 @@ export default function EcoFeedbackSystem() {
                           },
                           { 
                             value: hourlyDistribution.fueraPico.kWh, 
-                            name: 'P media', 
-                            itemStyle: { color: '#10b981' } // Verde para p media
+                            name: 'Tarifa media', 
+                            itemStyle: { color: '#10b981' } // Verde para tarifa media
                           },
                           { 
                             value: hourlyDistribution.pico.kWh, 
@@ -2096,7 +2231,7 @@ export default function EcoFeedbackSystem() {
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  <span className="text-sm font-medium">P media</span>
+                  <span className="text-sm font-medium">Tarifa media</span>
                 </div>
                 <div className="text-right">
                   <span className="text-base font-bold text-foreground">{Math.round(hourlyDistribution.fueraPico.percentage)}%</span>

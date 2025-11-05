@@ -41,7 +41,7 @@ const ThemeSwitcher = ({ open = false }: ThemeSwitcherProps) => {
         "relative hover:bg-accent/50 transition-colors group",
         open ? "h-9 w-auto px-3" : "h-10 w-10"
       )}
-      aria-label={`Cambiar a tema ${isLight ? 'Celsia' : 'Claro'}`}
+      aria-label={`Cambiar a tema ${isLight ? 'Celsia' : 'Ligero'}`}
     >
       <div className="relative flex items-center gap-2">
         {/* Sun Icon (Light Theme) */}
@@ -62,7 +62,7 @@ const ThemeSwitcher = ({ open = false }: ThemeSwitcherProps) => {
         
         {open && (
           <span className="text-sm min-w-[60px] text-left transition-all duration-300">
-            {isLight ? 'Claro' : 'Celsia'}
+            {isLight ? 'Ligero' : 'Celsia'}
           </span>
         )}
       </div>

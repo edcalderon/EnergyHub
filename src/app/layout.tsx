@@ -2,6 +2,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { AppWrapper } from "@/components/app-wrapper";
 import { cn } from "@/lib/utils";
+import { getAssetUrl } from "@/lib/url-utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +25,7 @@ export default function RootLayout({
         <meta name="twitter:title" content="Centro de Energía Celsia" />
         <meta name="twitter:description" content="Gestión Energética Inteligente - Monitoreo en tiempo real" />
         {/* Preload critical earth image for globe component - optimize loading */}
-        <link rel="preload" as="image" href="/images/earth-image.png" fetchPriority="high" />
+        <link rel="preload" as="image" href={getAssetUrl("/images/earth-image.png")} fetchPriority="high" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

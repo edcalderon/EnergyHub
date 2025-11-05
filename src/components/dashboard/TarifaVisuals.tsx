@@ -267,10 +267,22 @@ export function TarifaVigenteTabla() {
     Otros: 2.56,
   };
 
+  // Growth vs previous month data
+  const growthData: Record<string, number> = {
+    G: 1.5,
+    T: 0.3,
+    D: 0.6,
+    C: 0.4,
+    Perdidas: 0.5,
+    Otros: 0.8,
+  };
+  const totalGrowth = 0.9;
+
   const rows = Object.entries(dec).map(([k, v]) => ({
     k,
     v,
     p: percentages[k] || (v / total) * 100,
+    growth: growthData[k] || 0,
   }));
 
   return (
@@ -283,7 +295,8 @@ export function TarifaVigenteTabla() {
               <tr className="text-left text-muted-foreground border-b">
                 <th className="py-2 pr-3 font-medium">Componente</th>
                 <th className="py-2 pr-3 font-medium">Valor ($/kWh)</th>
-                <th className="py-2 font-medium">Participación</th>
+                <th className="py-2 pr-3 font-medium">Participación</th>
+                <th className="py-2 font-medium">Crecimiento vs mes anterior</th>
               </tr>
             </thead>
             <tbody>
@@ -296,7 +309,8 @@ export function TarifaVigenteTabla() {
                         {componentNames[r.k] || r.k}
                       </td>
                       <td className="py-2 pr-3 text-foreground">$ {r.v.toFixed(2)}</td>
-                      <td className="py-2 text-foreground">{r.p.toFixed(2)}%</td>
+                      <td className="py-2 pr-3 text-foreground">{r.p.toFixed(2)}%</td>
+                      <td className="py-2 text-foreground">{r.growth.toFixed(1)}%</td>
                     </tr>
                   </TooltipTrigger>
                   {componentNotes[r.k] && (
@@ -311,7 +325,8 @@ export function TarifaVigenteTabla() {
                   <tr className="border-t-2 border-primary/20 font-semibold cursor-help hover:bg-muted/50 transition-colors bg-muted/20">
                     <td className="py-2 pr-3">Tarifa</td>
                     <td className="py-2 pr-3 text-foreground">$ {total.toFixed(2)}</td>
-                    <td className="py-2 text-foreground">100.00%</td>
+                    <td className="py-2 pr-3 text-foreground">100.00%</td>
+                    <td className="py-2 text-foreground">{totalGrowth.toFixed(1)}%</td>
                   </tr>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-xs">

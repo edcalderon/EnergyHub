@@ -3,10 +3,11 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { getAssetUrl } from "@/lib/url-utils";
 
 type ComponentKey = "G" | "T" | "D" | "C" | "Perdidas" | "Otros";
@@ -70,9 +71,110 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
 
 export default function TarifaExplainer() {
   const keys: ComponentKey[] = ["G", "T", "D", "C", "Perdidas", "Otros"];
-  const [selectedComponent, setSelectedComponent] = useState<ComponentKey | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<ComponentKey | null>("G");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [swappedImages, setSwappedImages] = useState<Record<string, boolean>>({});
+  const [autoPlayProgress, setAutoPlayProgress] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const DISPLAY_TIME = 7000; // 7 segundos por componente para leer cómodamente
+
+  // Initialize currentIndex when component mounts
+  useEffect(() => {
+    if (selectedComponent) {
+      const index = keys.findIndex(k => k === selectedComponent);
+      if (index !== -1) {
+        setCurrentIndex(index);
+        setAutoPlayProgress(0); // Resetear progreso al montar
+      }
+    }
+  }, []); // Only run on mount
+
+  // Auto-play slider functionality
+  useEffect(() => {
+    // Limpiar intervalos existentes primero
+    if (autoPlayIntervalRef.current) {
+      clearTimeout(autoPlayIntervalRef.current);
+      autoPlayIntervalRef.current = null;
+    }
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+
+    if (!isAutoPlaying || dialogOpen || !selectedComponent) {
+      return;
+    }
+
+    // Reset progress cuando cambia el componente o se activa auto-play
+    setAutoPlayProgress(0);
+
+    // Iniciar el intervalo inmediatamente
+    const startProgress = () => {
+      // Update progress bar every 50ms for smooth animation
+      progressIntervalRef.current = setInterval(() => {
+        setAutoPlayProgress((prev) => {
+          const increment = 100 / (DISPLAY_TIME / 50);
+          const newProgress = prev + increment;
+          if (newProgress >= 100) {
+            clearInterval(progressIntervalRef.current!);
+            progressIntervalRef.current = null;
+            return 100;
+          }
+          return newProgress;
+        });
+      }, 50);
+    };
+
+    // Iniciar inmediatamente
+    startProgress();
+
+    // Auto-advance to next component
+    autoPlayIntervalRef.current = setTimeout(() => {
+      const currentIdx = keys.findIndex(k => k === selectedComponent);
+      const nextIndex = (currentIdx + 1) % keys.length;
+      setSelectedComponent(keys[nextIndex]);
+      setCurrentIndex(nextIndex);
+      setAutoPlayProgress(0);
+    }, DISPLAY_TIME);
+
+    return () => {
+      if (autoPlayIntervalRef.current) {
+        clearTimeout(autoPlayIntervalRef.current);
+        autoPlayIntervalRef.current = null;
+      }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    };
+  }, [isAutoPlaying, dialogOpen, keys, selectedComponent]);
+
+  // Sync currentIndex with selectedComponent when manually changed
+  useEffect(() => {
+    if (!selectedComponent) return;
+    
+    const index = keys.findIndex(k => k === selectedComponent);
+    if (index !== -1 && index !== currentIndex) {
+      // Limpiar intervalos existentes
+      if (autoPlayIntervalRef.current) {
+        clearTimeout(autoPlayIntervalRef.current);
+        autoPlayIntervalRef.current = null;
+      }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      setCurrentIndex(index);
+      // Resetear progreso inmediatamente
+      setAutoPlayProgress(0);
+    }
+    // No incluir currentIndex en las dependencias para evitar bucles
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedComponent, keys]);
 
   const scrollToSection = (sectionId: string) => {
     setDialogOpen(true);
@@ -100,6 +202,16 @@ export default function TarifaExplainer() {
         }
       }
     }, 300);
+  };
+
+  const handleComponentClick = (component: ComponentKey) => {
+    setIsAutoPlaying(false);
+    setSelectedComponent(selectedComponent === component ? null : component);
+    
+    // Resume auto-play after 2 seconds
+    setTimeout(() => {
+      setIsAutoPlaying(true);
+    }, 2000);
   };
 
   return (
@@ -132,7 +244,11 @@ export default function TarifaExplainer() {
           className="font-semibold cursor-pointer hover:text-primary transition-colors"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setSelectedComponent(null)}
+          onClick={() => {
+            setIsAutoPlaying(false);
+            setSelectedComponent(null);
+            setTimeout(() => setIsAutoPlaying(true), 2000);
+          }}
         >
           CU
         </motion.span>
@@ -142,7 +258,7 @@ export default function TarifaExplainer() {
             <InteractivePart 
               k={k} 
               isSelected={selectedComponent === k}
-              onClick={() => setSelectedComponent(selectedComponent === k ? null : k)}
+              onClick={() => handleComponentClick(k)}
             />
             {index < keys.length - 1 && <span className="opacity-70">+</span>}
           </div>
@@ -159,11 +275,23 @@ export default function TarifaExplainer() {
         className="pt-4"
       >
         {selectedComponent ? (
-          <Card className="p-6">
+          <Card className="p-6 relative overflow-hidden">
+            {/* Borde inferior que muestra el tiempo restante */}
+            <div 
+              className="absolute bottom-0 left-0 h-1"
+              style={{
+                backgroundColor: COMPONENT_INFO[selectedComponent].color,
+                width: isAutoPlaying ? `${Math.max(0, 100 - autoPlayProgress)}%` : '100%',
+                transition: 'width 50ms linear',
+                opacity: isAutoPlaying ? 1 : 0.5
+              }}
+            />
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: COMPONENT_INFO[selectedComponent].color }} />
-                <h3 className="text-lg font-semibold">{COMPONENT_INFO[selectedComponent].title}</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: COMPONENT_INFO[selectedComponent].color }} />
+                  <h3 className="text-lg font-semibold">{COMPONENT_INFO[selectedComponent].title}</h3>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -232,6 +360,55 @@ export default function TarifaExplainer() {
           </Card>
         ) : null}
       </motion.div>
+
+      {/* Slider de control - Puntos que se expanden a barras cuando están seleccionados */}
+      {selectedComponent && (
+        <div className="pt-4">
+          <div className="flex items-center justify-center gap-2">
+            {keys.map((key, index) => {
+              const isActive = selectedComponent === key;
+              
+              return (
+                <button
+                  key={key}
+                  onClick={() => {
+                    // Limpiar intervalos existentes
+                    if (autoPlayIntervalRef.current) {
+                      clearTimeout(autoPlayIntervalRef.current);
+                    }
+                    if (progressIntervalRef.current) {
+                      clearInterval(progressIntervalRef.current);
+                    }
+                    
+                    // Resetear progreso y cambiar componente
+                    setAutoPlayProgress(0);
+                    setIsAutoPlaying(false);
+                    setSelectedComponent(key);
+                    setCurrentIndex(index);
+                    
+                    // Reanudar auto-play después de 2 segundos
+                    setTimeout(() => {
+                      setIsAutoPlaying(true);
+                    }, 2000);
+                  }}
+                  className="group flex items-center"
+                >
+                  <div
+                    className={`rounded-full border border-gray-300 overflow-hidden transition-all duration-200 ${
+                      isActive ? 'scale-105' : 'opacity-50 hover:opacity-75'
+                    }`}
+                    style={{
+                      backgroundColor: COMPONENT_INFO[key].color,
+                      height: '12px',
+                      width: isActive ? '60px' : '12px'
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       
       {/* Sección de información ampliada y botones rápidos con scroll infinito */}
       <div className="pt-4 overflow-hidden">

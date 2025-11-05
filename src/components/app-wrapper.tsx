@@ -15,6 +15,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { UserMenu } from "@/components/user-menu";
 import { getAssetUrl } from "@/lib/url-utils";
 import Image from "next/image";
+import { Toaster } from "@/components/ui/toaster";
 
 export function AppWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,28 +176,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-auto mb-4 px-2">
-                      <div className="border-t border-border pt-4 flex flex-col gap-2">
-                        <ThemeSwitcher open={sidebarOpen} />
-                        <button
-                          onClick={() => setSidebarLocked(!sidebarLocked)}
-                          className="text-foreground cursor-pointer hover:bg-orange-100 rounded-lg p-2 transition-colors celsia:hover:bg-orange-200 flex items-center gap-2 w-full"
-                          title={sidebarLocked ? "Desbloquear sidebar" : "Bloquear sidebar"}
-                        >
-                          {sidebarLocked ? (
-                            <>
-                              <Lock className="h-4 w-4 text-orange-600" />
-                              <span className="text-sm">Bloqueado</span>
-                            </>
-                          ) : (
-                            <>
-                              <Unlock className="h-4 w-4" />
-                              <span className="text-sm">Bloquear</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
+                    {/* ThemeSwitcher and Lock button removed from mobile menu - they're already in the top nav bar */}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -346,6 +326,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </div>
+        <Toaster />
       </UserProvider>
     </ThemeProvider>
   );

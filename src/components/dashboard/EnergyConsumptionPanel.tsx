@@ -1,4 +1,4 @@
-import { Activity, TrendingDown, TrendingUp, Zap, Calendar } from "lucide-react";
+import { Activity, TrendingDown, TrendingUp, Zap, Calendar, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReactECharts from 'echarts-for-react';
 import { useTheme } from "next-themes";
 import * as echarts from 'echarts';
+import { useUser } from "@/contexts/user-context";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function EnergyConsumptionPanel() {
   const { theme } = useTheme();
+  const { user } = useUser();
+  const { toast } = useToast();
   
   // Mock data for energy consumption
   const mockData = {
@@ -25,6 +29,15 @@ export default function EnergyConsumptionPanel() {
       { day: "Sáb", value: 45, cost: 66000 },
       { day: "Dom", value: 38, cost: 56000 }
     ],
+    previousWeekConsumption: [
+      { day: "Lun", value: 82, cost: 120000 },
+      { day: "Mar", value: 75, cost: 110000 },
+      { day: "Mié", value: 88, cost: 130000 },
+      { day: "Jue", value: 85, cost: 125000 },
+      { day: "Vie", value: 72, cost: 105000 },
+      { day: "Sáb", value: 42, cost: 62000 },
+      { day: "Dom", value: 35, cost: 51000 }
+    ],
     monthlyConsumption: [
       { month: "Jul", value: 72, cost: 1050000 },
       { month: "Ago", value: 85, cost: 1250000 },
@@ -33,6 +46,28 @@ export default function EnergyConsumptionPanel() {
       { month: "Nov", value: 82, cost: 1200000 },
       { month: "Dic", value: 95, cost: 1400000 }
     ],
+    yearlyConsumption: [
+      { year: "2022", value: 12450, cost: 182000000 },
+      { year: "2023", value: 13180, cost: 193000000 },
+      { year: "2024", value: 14960, cost: 219000000 }
+    ],
+    lastWeekReactive: [
+      { day: "Lun", active: 85, inductive: 12, capacitive: 8 },
+      { day: "Mar", active: 78, inductive: 11, capacitive: 7 },
+      { day: "Mié", active: 92, inductive: 13, capacitive: 9 },
+      { day: "Jue", active: 88, inductive: 12.5, capacitive: 8.5 },
+      { day: "Vie", active: 75, inductive: 10.5, capacitive: 7.5 },
+      { day: "Sáb", active: 45, inductive: 6.5, capacitive: 4.5 },
+      { day: "Dom", active: 38, inductive: 5.5, capacitive: 3.5 }
+    ],
+    monthlyReactive: [
+      { month: "Jul", active: 72, inductive: 10, capacitive: 7 },
+      { month: "Ago", active: 85, inductive: 12, capacitive: 8.5 },
+      { month: "Sep", active: 68, inductive: 9.5, capacitive: 6.5 },
+      { month: "Oct", active: 78, inductive: 11, capacitive: 7.5 },
+      { month: "Nov", active: 82, inductive: 11.5, capacitive: 8 },
+      { month: "Dic", active: 95, inductive: 13.5, capacitive: 9.5 }
+    ],
     peakHours: [18, 19, 20, 21],
     offPeakHours: [1, 2, 3, 4, 5, 6],
     efficiency: 87.5,
@@ -40,6 +75,156 @@ export default function EnergyConsumptionPanel() {
   };
 
   const percentageChange = ((mockData.currentConsumption - mockData.previousConsumption) / mockData.previousConsumption) * 100;
+
+  const handleExportCSV = () => {
+    try {
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "No hay información de usuario disponible",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Prepare comprehensive CSV data
+      const csvRows: string[] = [];
+      
+      // Header Section
+      csvRows.push("RESUMEN EJECUTIVO - DATOS DEL USUARIO");
+      csvRows.push("");
+      csvRows.push(`Nombre,${user.nombre || "N/A"}`);
+      csvRows.push(`ID de Contrato,${user.contractId || "N/A"}`);
+      csvRows.push(`Dirección,${user.ubicacion?.address || "N/A"}`);
+      csvRows.push(`Fecha de Exportación,${new Date().toLocaleString("es-CO")}`);
+      csvRows.push("");
+      
+      // Consumption Metrics Section
+      csvRows.push("MÉTRICAS DE CONSUMO");
+      csvRows.push("");
+      csvRows.push("Métrica,Valor,Unidad");
+      csvRows.push(`Consumo Actual,${mockData.currentConsumption},kWh`);
+      csvRows.push(`Consumo Anterior,${mockData.previousConsumption},kWh`);
+      csvRows.push(`Variación,${percentageChange.toFixed(1)},%`);
+      csvRows.push(`Costo Proyectado,${mockData.projectedCost},COP`);
+      csvRows.push(`Eficiencia Energética,${mockData.efficiency},%`);
+      csvRows.push(`Ahorro Mensual,${mockData.savings},COP`);
+      csvRows.push("");
+      
+      // Monthly Consumption Section
+      csvRows.push("CONSUMO MENSUAL");
+      csvRows.push("");
+      csvRows.push("Mes,Consumo (kWh),Costo (COP)");
+      mockData.monthlyConsumption.forEach(item => {
+        const monthNames: { [key: string]: string } = {
+          "Jul": "Julio", "Ago": "Agosto", "Sep": "Septiembre",
+          "Oct": "Octubre", "Nov": "Noviembre", "Dic": "Diciembre"
+        };
+        csvRows.push(`${monthNames[item.month] || item.month},${item.value},${item.cost}`);
+      });
+      csvRows.push("");
+      
+      // Weekly Consumption Section
+      csvRows.push("CONSUMO SEMANAL");
+      csvRows.push("");
+      csvRows.push("Día,Consumo (kWh),Costo (COP)");
+      mockData.weeklyConsumption.forEach(item => {
+        csvRows.push(`${item.day},${item.value},${item.cost}`);
+      });
+      csvRows.push("");
+      
+      // Reactive Energy Section
+      csvRows.push("ENERGÍA REACTIVA - ÚLTIMA SEMANA");
+      csvRows.push("");
+      csvRows.push("Día,Activa (kWh),Inductiva (kWh),Capacitiva (kWh)");
+      mockData.lastWeekReactive.forEach(item => {
+        csvRows.push(`${item.day},${item.active},${item.inductive},${item.capacitive}`);
+      });
+      csvRows.push("");
+      
+      csvRows.push("ENERGÍA REACTIVA - MENSUAL");
+      csvRows.push("");
+      csvRows.push("Mes,Activa (kWh),Inductiva (kWh),Capacitiva (kWh)");
+      mockData.monthlyReactive.forEach(item => {
+        const monthNames: { [key: string]: string } = {
+          "Jul": "Julio", "Ago": "Agosto", "Sep": "Septiembre",
+          "Oct": "Octubre", "Nov": "Noviembre", "Dic": "Diciembre"
+        };
+        csvRows.push(`${monthNames[item.month] || item.month},${item.active},${item.inductive},${item.capacitive}`);
+      });
+      csvRows.push("");
+      
+      // Hourly Distribution Section
+      csvRows.push("DISTRIBUCIÓN HORARIA");
+      csvRows.push("");
+      csvRows.push("Franja,Porcentaje,Consumo (kWh)");
+      csvRows.push("Valle (Tarifa Baja),45,560");
+      csvRows.push("Tarifa Media,35,437");
+      csvRows.push("Pico (Tarifa Alta),20,250");
+      csvRows.push("");
+      
+      // Environmental Impact Section
+      csvRows.push("IMPACTO AMBIENTAL");
+      csvRows.push("");
+      csvRows.push("Métrica,Valor,Unidad");
+      csvRows.push("CO2 Emitido,2.4,toneladas");
+      csvRows.push("Equivalente en Árboles,112,árboles");
+      csvRows.push("Agua Virtual,1850,litros");
+      csvRows.push("Huella de Carbono,3.2,toneladas CO2");
+      csvRows.push("");
+      
+      // Energy Efficiency Section
+      csvRows.push("EFICIENCIA ENERGÉTICA");
+      csvRows.push("");
+      csvRows.push("Métrica,Valor,Unidad");
+      csvRows.push("Meta de Sostenibilidad,65,%");
+      csvRows.push("Progreso Actual,42,%");
+      csvRows.push("Reducción Horas Pico,15,%");
+      csvRows.push("Incremento Horas Valle,22,%");
+      csvRows.push("");
+      
+      // Join all rows with UTF-8 BOM for Excel compatibility
+      const BOM = "\uFEFF";
+      const csvContent = BOM + csvRows.join("\n");
+      
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      
+      const fileName = `datos_energia_${(user.nombre || "usuario").replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`;
+      
+      link.href = url;
+      link.download = fileName;
+      link.style.display = "none";
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      // Show toast notification
+      setTimeout(() => {
+        toast({
+          title: "CSV descargado con éxito!",
+          description: "Los datos se han descargado correctamente en formato CSV",
+        });
+      }, 150);
+    } catch (error) {
+      console.error("Error al exportar CSV:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo exportar el archivo CSV. Por favor, intenta nuevamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // ECharts configurations
   const chartTheme = theme === 'dark' ? 'dark' : 'light';
@@ -187,16 +372,23 @@ export default function EnergyConsumptionPanel() {
       }
     },
     series: [{
-      data: mockData.weeklyConsumption.map(item => item.value),
+      data: mockData.weeklyConsumption.map((value, index) => ({
+        value: value.value,
+        itemStyle: {
+          color: theme === 'dark' 
+            ? new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#3b82f6' },
+                { offset: 1, color: '#1e40af' }
+              ])
+            : new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#3b82f6' },
+                { offset: 1, color: '#1d4ed8' }
+              ]),
+          borderRadius: [4, 4, 0, 0]
+        }
+      })),
       type: 'bar',
       barWidth: '60%',
-      itemStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: '#3b82f6' },
-          { offset: 1, color: '#1d4ed8' }
-        ]),
-        borderRadius: [4, 4, 0, 0]
-      },
       emphasis: {
         itemStyle: {
           shadowBlur: 10,
@@ -294,6 +486,444 @@ export default function EnergyConsumptionPanel() {
     }]
   };
 
+  // Two consecutive weeks comparison chart
+  const twoWeeksComparisonOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        let result = params[0].axisValue + '<br/>';
+        params.forEach((item: any) => {
+          result += `${item.marker}${item.seriesName}: ${item.value} kWh<br/>`;
+        });
+        return result;
+      }
+    },
+    legend: {
+      data: ['Semana Actual', 'Semana Anterior'],
+      top: 10,
+      textStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: mockData.weeklyConsumption.map(item => item.day),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [
+      {
+        name: 'Semana Actual',
+        data: mockData.weeklyConsumption.map(item => item.value),
+        type: 'bar',
+        barWidth: '35%',
+        itemStyle: {
+          color: '#ff7f0e', // Naranja como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: 'Semana Anterior',
+        data: mockData.previousWeekConsumption.map(item => item.value),
+        type: 'bar',
+        barWidth: '35%',
+        itemStyle: {
+          color: '#9ca3b8', // Gris como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+
+  // Two consecutive years comparison chart
+  const twoYearsComparisonOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        const data = params[0];
+        const year = data.axisValue;
+        const value = data.value;
+        const cost = mockData.yearlyConsumption.find(item => item.year === year)?.cost || 0;
+        return `${year}<br/>Consumo: ${value} kWh<br/>Costo: $${(cost / 1000000).toFixed(1)}M COP`;
+      }
+    },
+    legend: {
+      data: ['Consumo Anual'],
+      top: 10,
+      textStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: mockData.yearlyConsumption.map(item => item.year),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [{
+      name: 'Consumo Anual',
+      data: mockData.yearlyConsumption.map((item, index) => ({
+        value: item.value,
+        itemStyle: {
+          color: index === mockData.yearlyConsumption.length - 1 
+            ? '#ff7f0e' // Naranja para el año más reciente
+            : '#9ca3b8', // Gris para años anteriores
+          borderRadius: [4, 4, 0, 0]
+        }
+      })),
+      type: 'bar',
+      barWidth: '60%',
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }]
+  };
+
+  // Last week reactive energy chart
+  const lastWeekReactiveOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        let result = params[0].axisValue + '<br/>';
+        params.forEach((item: any) => {
+          result += `${item.marker}${item.seriesName}: ${item.value} kWh<br/>`;
+        });
+        return result;
+      }
+    },
+    legend: {
+      data: ['Energía Activa', 'Reactiva Inductiva', 'Reactiva Capacitiva'],
+      top: 10,
+      textStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: mockData.lastWeekReactive.map(item => item.day),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [
+      {
+        name: 'Energía Activa',
+        data: mockData.lastWeekReactive.map(item => item.active),
+        type: 'bar',
+        barWidth: '25%',
+        itemStyle: {
+          color: '#ff7f0e', // Naranja como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: 'Reactiva Inductiva',
+        data: mockData.lastWeekReactive.map(item => item.inductive),
+        type: 'bar',
+        barWidth: '25%',
+        itemStyle: {
+          color: '#9ca3b8', // Gris como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: 'Reactiva Capacitiva',
+        data: mockData.lastWeekReactive.map(item => item.capacitive),
+        type: 'bar',
+        barWidth: '25%',
+        itemStyle: {
+          color: '#10b981', // Verde como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+
+  // Monthly reactive energy chart (bars)
+  const monthlyReactiveBarsOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+      borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+      textStyle: {
+        color: theme === 'dark' ? '#f9fafb' : '#111827'
+      },
+      formatter: function(params: any) {
+        let result = params[0].axisValue + '<br/>';
+        params.forEach((item: any) => {
+          result += `${item.marker}${item.seriesName}: ${item.value} kWh<br/>`;
+        });
+        return result;
+      }
+    },
+    legend: {
+      data: ['Energía Activa', 'Reactiva Inductiva', 'Reactiva Capacitiva'],
+      top: 10,
+      textStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: mockData.monthlyReactive.map(item => item.month),
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'kWh',
+      nameTextStyle: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLabel: {
+        color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+      },
+      axisLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#e5e7eb'
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: theme === 'dark' ? '#374151' : '#f3f4f6'
+        }
+      }
+    },
+    series: [
+      {
+        name: 'Energía Activa',
+        data: mockData.monthlyReactive.map(item => item.active),
+        type: 'bar',
+        barWidth: '25%',
+        itemStyle: {
+          color: '#ff7f0e', // Naranja como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: 'Reactiva Inductiva',
+        data: mockData.monthlyReactive.map(item => item.inductive),
+        type: 'bar',
+        barWidth: '25%',
+        itemStyle: {
+          color: '#9ca3b8', // Gris como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: 'Reactiva Capacitiva',
+        data: mockData.monthlyReactive.map(item => item.capacitive),
+        type: 'bar',
+        barWidth: '25%',
+        itemStyle: {
+          color: '#10b981', // Verde como la gráfica diaria
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+
   return (
     <Card className="bg-card border-border">
       <div className="p-6 border-b border-border">
@@ -307,8 +937,17 @@ export default function EnergyConsumptionPanel() {
               <p className="text-sm text-muted-foreground">Análisis y proyecciones en tiempo real</p>
             </div>
           </div>
-          <Button variant="outline" size="sm">
-            <Calendar className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleExportCSV();
+            }}
+            type="button"
+          >
+            <Download className="h-4 w-4 mr-2" />
             Exportar Datos
           </Button>
         </div>
@@ -370,10 +1009,11 @@ export default function EnergyConsumptionPanel() {
 
         {/* Tabs for different views */}
         <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="daily">Diario</TabsTrigger>
             <TabsTrigger value="weekly">Semanal</TabsTrigger>
             <TabsTrigger value="monthly">Mensual</TabsTrigger>
+            <TabsTrigger value="comparativos">Comparativos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="daily" className="mt-6">
@@ -468,6 +1108,70 @@ export default function EnergyConsumptionPanel() {
                     <TrendingUp className="h-5 w-5 inline mr-1" />
                     +12.5%
                   </p>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="comparativos" className="mt-6">
+            <div className="space-y-8">
+              {/* Comparativo entre dos semanas seguidas */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Comparativo Semanal</span>
+                  <Badge variant="outline">Dos semanas consecutivas</Badge>
+                </div>
+                <div className="h-80">
+                  <ReactECharts 
+                    option={twoWeeksComparisonOption} 
+                    style={{ height: '100%', width: '100%' }}
+                    theme={chartTheme}
+                  />
+                </div>
+              </div>
+
+              {/* Comparativo entre dos años seguidos */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Comparativo Anual</span>
+                  <Badge variant="outline">Últimos años</Badge>
+                </div>
+                <div className="h-80">
+                  <ReactECharts 
+                    option={twoYearsComparisonOption} 
+                    style={{ height: '100%', width: '100%' }}
+                    theme={chartTheme}
+                  />
+                </div>
+              </div>
+
+              {/* Consumo última semana con energía reactiva */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Energía Reactiva - Última Semana</span>
+                  <Badge variant="outline">Activa, Inductiva y Capacitiva</Badge>
+                </div>
+                <div className="h-80">
+                  <ReactECharts 
+                    option={lastWeekReactiveOption} 
+                    style={{ height: '100%', width: '100%' }}
+                    theme={chartTheme}
+                  />
+                </div>
+              </div>
+
+              {/* Mensual con energía reactiva en barras */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Energía Reactiva - Mensual</span>
+                  <Badge variant="outline">Últimos 6 meses</Badge>
+                </div>
+                <div className="h-80">
+                  <ReactECharts 
+                    option={monthlyReactiveBarsOption} 
+                    style={{ height: '100%', width: '100%' }}
+                    theme={chartTheme}
+                  />
                 </div>
               </div>
             </div>
