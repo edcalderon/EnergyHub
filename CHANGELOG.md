@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3] - 2025-11-05
+### PATCH
+- Auto-generated release entry
+- Git commit: 92a0d3f
+- Build date: 2025-11-05
+
+
 ## [1.1.2] - 2025-11-05
 ### PATCH
 - Mejoras en el sistema EcoFeedback:
