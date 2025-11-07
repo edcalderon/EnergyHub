@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4] - 2025-11-07
+### PATCH
+- Auto-generated release entry
+- Git commit: 326ab39
+- Build date: 2025-11-07
+
+
 ## [1.1.3] - 2025-11-05
 ### PATCH
 - Auto-generated release entry

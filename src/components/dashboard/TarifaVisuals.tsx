@@ -276,7 +276,7 @@ export function TarifaVigenteTabla() {
     Perdidas: 0.5,
     Otros: 0.8,
   };
-  const totalGrowth = 0.9;
+  const totalGrowth = 1.6;
 
   const rows = Object.entries(dec).map(([k, v]) => ({
     k,
@@ -287,50 +287,88 @@ export function TarifaVigenteTabla() {
 
   return (
     <Card className="p-4">
-      <h3 className="font-semibold mb-3">Tarifa vigente — dic-25</h3>
-      <TooltipProvider>
+      <h3 className="font-semibold mb-4 text-lg">Tarifa vigente — dic-25</h3>
+      <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/10 text-primary text-xs mr-1">i</span>
+        Pasa el cursor sobre cada fila para ver más detalles
+      </div>
+      <TooltipProvider delayDuration={50}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-muted-foreground border-b">
-                <th className="py-2 pr-3 font-medium">Componente</th>
-                <th className="py-2 pr-3 font-medium">Valor ($/kWh)</th>
-                <th className="py-2 pr-3 font-medium">Participación</th>
-                <th className="py-2 font-medium">Crecimiento vs mes anterior</th>
+              <tr className="text-center text-muted-foreground border-b">
+                <th className="py-3 px-2 font-medium text-left w-1/4">Componente</th>
+                <th className="py-3 px-2 font-medium w-1/4">Valor ($/kWh)</th>
+                <th className="py-3 px-2 font-medium w-1/4">Participación</th>
+                <th className="py-3 px-2 font-medium w-1/4">Crecimiento vs mes anterior</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <Tooltip key={r.k}>
                   <TooltipTrigger asChild>
-                    <tr className="border-b cursor-help hover:bg-muted/50 transition-colors">
-                      <td className="py-2 pr-3 flex items-center gap-2">
-                        <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: (colors as any)[r.k as keyof typeof colors] }} />
-                        {componentNames[r.k] || r.k}
+                    <tr className="border-b cursor-help hover:bg-muted/30 transition-colors">
+                      <td className="py-3 px-2">
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="inline-block w-3 h-3 rounded-full flex-shrink-0" 
+                            style={{ backgroundColor: (colors as any)[r.k as keyof typeof colors] }} 
+                          />
+                          <span className="truncate">{componentNames[r.k] || r.k}</span>
+                        </div>
                       </td>
-                      <td className="py-2 pr-3 text-foreground">$ {r.v.toFixed(2)}</td>
-                      <td className="py-2 pr-3 text-foreground">{r.p.toFixed(2)}%</td>
-                      <td className="py-2 text-foreground">{r.growth.toFixed(1)}%</td>
+                      <td className="py-3 px-2 text-center">$ {r.v.toFixed(2)}</td>
+                      <td className="py-3 px-2 text-center">{r.p.toFixed(2)}%</td>
+                      <td className="py-3 px-2 text-center">
+                        <span className={`${r.growth > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                          {r.growth > 0 ? '↑' : '↓'} {Math.abs(r.growth).toFixed(1)}%
+                        </span>
+                      </td>
                     </tr>
                   </TooltipTrigger>
                   {componentNotes[r.k] && (
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="text-sm">{componentNotes[r.k]}</p>
+                    <TooltipContent 
+                      side="top" 
+                      align="start"
+                      className="max-w-xs bg-foreground text-background p-3 text-sm rounded-lg shadow-lg border border-border/50"
+                      sideOffset={5}
+                    >
+                      <div className="font-semibold mb-1.5 text-background">{componentNames[r.k] || r.k}</div>
+                      <p className="text-background/90">{componentNotes[r.k]}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
               ))}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <tr className="border-t-2 border-primary/20 font-semibold cursor-help hover:bg-muted/50 transition-colors bg-muted/20">
-                    <td className="py-2 pr-3">Tarifa</td>
-                    <td className="py-2 pr-3 text-foreground">$ {total.toFixed(2)}</td>
-                    <td className="py-2 pr-3 text-foreground">100.00%</td>
-                    <td className="py-2 text-foreground">{totalGrowth.toFixed(1)}%</td>
+                  <tr className="border-t-2 border-primary/20 font-semibold bg-muted/20 hover:bg-muted/40 transition-colors">
+                    <td className="py-3 px-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block w-3 h-3 rounded-full bg-primary/80" />
+                        <span>Tarifa Total</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2 text-center font-bold">$ {total.toFixed(2)}</td>
+                    <td className="py-3 px-2 text-center">100.00%</td>
+                    <td className="py-3 px-2 text-center">
+                      <span className={`inline-flex items-center justify-center min-w-[60px] px-2 py-1 rounded-full text-xs ${
+                        totalGrowth > 0 
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/80 dark:text-red-100' 
+                          : 'bg-green-100 text-green-700 dark:bg-green-900/80 dark:text-green-100'
+                      }`}>
+                        {totalGrowth > 0 ? '↑' : '↓'} {Math.abs(totalGrowth).toFixed(1)}%
+                      </span>
+                    </td>
                   </tr>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="max-w-xs">
-                  <p className="text-sm">Resultado ponderado de los anteriores</p>
+                <TooltipContent 
+                  side="top" 
+                  align="start"
+                  className="max-w-xs bg-foreground text-background p-3 text-sm rounded-lg shadow-lg border border-border/50"
+                  sideOffset={5}
+                >
+                  <div className="font-semibold mb-1.5 text-background">Tarifa Total</div>
+                  <p className="text-background/90">Resultado ponderado de todos los componentes de la tarifa</p>
                 </TooltipContent>
               </Tooltip>
             </tbody>

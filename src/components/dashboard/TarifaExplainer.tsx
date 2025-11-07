@@ -18,10 +18,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Es el costo de producir la energía que llega a tu empresa; depende del clima, los combustibles y la disponibilidad de las plantas generadoras.",
     color: "#1f77b4",
-    image: [
-      getAssetUrl("/images/costo-unitario/generacion-1.jpg"),
-      getAssetUrl("/images/costo-unitario/generacion-2.jpg")
-    ],
+    image: getAssetUrl("/images/costo-unitario/generacion.jpg"),
     example: "Ejemplo: cuando hay sequía y baja el nivel de los embalses, el costo de generación suele subir.",
   },
   T: {
@@ -64,7 +61,7 @@ const COMPONENT_INFO: Record<ComponentKey, { title: string; description: string;
     description:
       "Cobros obligatorios fijados por el Estado que ayudan a mantener estable y confiable el servicio de energía en todo el país.",
     color: "#8c564b",
-    image: getAssetUrl("/images/costo-unitario/Imagen 6.webp"),
+    image: getAssetUrl("/images/costo-unitario/otros.webp"),
     example: "Ejemplo: contribuciones y cargos regulatorios para mantener el sistema confiable.",
   },
 };
